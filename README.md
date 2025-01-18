@@ -13,15 +13,16 @@
 
 
 ## 2. 팀원(데브로퍼) 소개
-| ![Yellu](./yellu.png) | ![hello](./hello.png) |
+| <img src="./Yellu.png" width="100" height="100"/> | <img src="./hello.png" width="100" height="100"/>|
 | ---------------------- | ---------------------- |
-| [Yellu](https://github.com/id) | [hello](https://github.com/id) |
-| 팀클라우드 대표 옐루예요! 잘 부탁드려요! | 아무튼 하는것이 많은 팀클라우드 소속 개발자 입니다. |
+| [Yellu](https://github.com/tmdgus0843) | [hello](https://github.com/momttom2) |
+| 팀클라우드 대표 옐루예요! <br> 잘 부탁드려요! | 아무튼 하는것이 많은 <br> 팀클라우드 소속 개발자 입니다. |
 
 
 
 ## 3. 프로젝트 설명
-Notion: [프로젝트 상세 링크](https://)
+Notion: [프로젝트 상세 링크](https://www.notion.so/17f3998cbd06806db998f0c6370db15e?v=17f3998cbd06813b8d59000ca9b68a65&pvs=4)
+
 본 프로젝트는 팀클라우드의 카카오톡 봇 'Project-Rumi'를 개발하는 프로젝트입니다.
 
 
@@ -29,13 +30,13 @@ Notion: [프로젝트 상세 링크](https://)
 ## 4. 기술 스택
 
 ### Integrated Development Environment(IDE)
-![VS Code](https://code.visualstudio.com/)
+<img src="https://velog.velcdn.com/images/csu5216/post/0f1238fc-ddba-4280-ad29-58db32387ea1/image.jpg" width="20" height="20"/> VS Code
 
 ### Development
-![JavaScript](https://developer.mozilla.org/ko/docs/Web/JavaScript)
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Unofficial_JavaScript_logo_2.svg/640px-Unofficial_JavaScript_logo_2.svg.png" width="20" height="20"/> JavaScript
 
 ### Project Management
-[![GitHub Issues](./GitHub%20Issues.png)](https://github.com/TeamCloud-Office/Project-Rumi/issues) [![GitHub Pull Requests](./GitHub%20Pull%20Request.png)](https://github.com/TeamCloud-Office/Project-Rumi/pulls)
+[GitHub Issues](https://github.com/TeamCloud-Office/Project-Rumi/issues) [GitHub Pull Requests](https://github.com/TeamCloud-Office/Project-Rumi/pulls)
 
 
 
