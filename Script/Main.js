@@ -2,9 +2,8 @@
 
 /////////////////
 // 제작자: TeamCloud - 개발팀
-// 코드 버전: release 4.3.0
-// 본 코드는 TeamCloud의 코드 라이선스(CCL BY-SA 2.0)를 따릅니다.
-// 본 코드는 TeamCloud의 저작물로 TeamCloud의 코드 라이선스를 따라야합니다.
+// 코드 버전: release 0.0.1
+// 본 코드는 TeamCloud의 저작물로 TeamCloud의 코드 라이선스(CCL BY-SA 2.0)를 따라야합니다.
 /////////////////
 
 Broadcast.send("Default"); //변수들 모음

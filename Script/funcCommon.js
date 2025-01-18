@@ -1,15 +1,3 @@
-//Common.js
-
-/////////////////
-// 제작자: TeamCloud - 개발팀
-// 코드 버전: release 0.0.1
-// 본 코드는 TeamCloud의 저작물로 TeamCloud의 코드 라이선스(CCL BY-SA 2.0)를 따라야합니다.
-/////////////////
-
-
-Broadcast.send("Default"); //Default 불러오기
-let threadQueue = [];
-
 function funcCommon() {
   return {
     file: function (path) {
@@ -80,13 +68,9 @@ function funcCommon() {
         this.timeStemp.push((new Date()).getTime()); //현재 시간 기록
         this.removeDumpTimeout(); //시간 초과된 데이터 확인 후 삭제
       };
-      this.resetTimeStemp = function (i) {
-        if (!this.Lock) this.timeStemp[i] = (new Date()).getDate();
-      }
+      this.resetTimeStemp = function (idx) {
+        if (!this.Lock) this.timeStemp[idx] = (new Date()).getDate();
+      };
     }
-  }
+  };
 }
-
-Broadcast.register("Common", () => {
-  return eval(Common = funcCommon());
-});

@@ -6,6 +6,7 @@
 // 본 코드는 TeamCloud의 저작물로 TeamCloud의 코드 라이선스(CCL BY-SA 2.0)를 따라야합니다.
 /////////////////
 
+
 /////////////////
 // (string) msg.content: 메시지의 내용
 // (string) msg.room: 메시지를 받은 방 이름
@@ -50,11 +51,11 @@ function funcDefault() {
 
     rootPath: "sdcard/TeamCloud/",
     fileList: {
-      User: "BotData/Users/UserData.json",
-      Atten: "BotData/Game/AttenData.json",
-      Set: "BotData/ETC/SetData.json",
-      Stock: "BotData/Game/StockData.json",
-      Post: "BotData/Users/PostData.json"
+      UserList: "BotData/Users/UserList.json",
+      AttenList: "BotData/Game/AttenList.json",
+      SetList: "BotData/ETC/SetList.json",
+      StockList: "BotData/Game/StockList.json",
+      PostList: "BotData/Users/PostList.json"
     },
 
     DBFileList: {

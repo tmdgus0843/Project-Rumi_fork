@@ -3,13 +3,19 @@
 /////////////////
 // 제작자: TeamCloud - 개발팀
 // 코드 버전: release 0.0.1
-// 본 코드는 TeamCloud의 코드 라이선스(CCL BY-SA 2.0)를 따라야합니다.
+// 본 코드는 TeamCloud의 저작물로 TeamCloud의 코드 라이선스(CCL BY-SA 2.0)를 따라야합니다.
 /////////////////
 
 
 Broadcast.send("Default"); //Default.js의 변수 불러오기
 Broadcast.send("Common"); //Common.js의 변수 불러오기
 Broadcast.send("DataBase"); //DataBase.js의 변수 불러오기
+
+let MineList = DataBase.getMineralItem()
+function clsUserInfo(info) {
+
+}
+
 
 function clsUserOption(info) {
     let userName = info.name,
@@ -110,7 +116,7 @@ function clsAttendance(info) {
         Push: function (id) {
             pushList.push(id);
         },
-        isUser: function(id) {
+        isUser: function (id) {
             return (pushList.includes(id))
         }
     }
