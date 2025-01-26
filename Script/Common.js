@@ -7,31 +7,31 @@
 
 let {
   Library
-} = require("Library");
+} = require("Library"); //Library.js 파일을 불러옵니다.
 
-let threadQueue = [];
+let threadQueue = []; //스레드 큐
 
 (function () {
   function Common() {
     return {
-      file: function (path) {
+      file: function (path) { //파일 경로를 반환합니다.
         return Library.rootPath + path;
       },
-      read: function (path) {
+      read: function (path) { //파일을 읽어 반환합니다.
         try {
           return JSON.parse(FileStream.read(this.file(path)));
         } catch (e) {
           this.logE("read()", e);
         }
       },
-      write: function (path, obj) {
+      write: function (path, obj) { //파일에 데이터를 작성합니다.
         try {
           FileStream.write(this.file(path), JSON.stringify(obj));
         } catch (e) {
           this.logE("write()", e)
         }
       },
-      remove: function (path) {
+      remove: function (path) { //파일을 삭제합니다.
         try {
           FileStream.remove(this.file(path));
         } catch (e) {
@@ -39,17 +39,17 @@ let threadQueue = [];
         }
       },
 
-      Random: function (start, end) {
+      Random: function (start, end) { //랜덤값을 반환합니다.
         return (start + (Math.random() * (end - start)))
       },
-      RandomFloat: function (start, end) {
+      RandomFloat: function (start, end) { //랜덤 실수값을 반환합니다.
         return (start + Math.floor(Math.random() * (end - start + 1)));
       },
 
-      logI: function (funcName, data) {
+      logI: function (funcName, data) { //정보 로그를 출력합니다.
         Log.i(`${funcName} func --- ${data}`);
       },
-      logE: function (funcName, data) {
+      logE: function (funcName, data) { //에러 로그를 출력합니다.
         Log.i(`${funcName} func --- ${data}`);
       },
 
@@ -58,7 +58,7 @@ let threadQueue = [];
         this.timeStemp = []; //각 데이터 저장 시간 기록
         this.Lock = false; //순차적 작동을 위한 잠금장치
 
-        this.removeDumpTimeout = function () {
+        this.removeDumpTimeout = function () { // 시간 초과된 데이터 삭제
           if (!this.Lock) { //잠겨있지 않다면
             this.Lock = true; //잠금 설정
             let tmp;
@@ -72,12 +72,12 @@ let threadQueue = [];
             this.Lock = false; //모든 작업 종료 후 잠금 해제
           }
         };
-        this.addDump = function (obj) {
+        this.addDump = function (obj) { //임시 데이터 추가
           this.dumpList.push(obj); //새로운 데이터 추가
           this.timeStemp.push((new Date()).getTime()); //현재 시간 기록
           this.removeDumpTimeout(); //시간 초과된 데이터 확인 후 삭제
         };
-        this.resetTimeStemp = function (i) {
+        this.resetTimeStemp = function (i) { //저장 시간 기록 초기화
           if (!this.Lock) this.timeStemp[i] = (new Date()).getDate(); //잠겨있지 않다면 저장 시간을 재설정
         }
       }

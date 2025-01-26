@@ -7,49 +7,49 @@
 
 let {
   Library
-} = require("Library");
+} = require("Library"); //Library.js 파일을 불러옵니다.
 let {
   Common
-} = require("Common");
+} = require("Common"); //Common.js 파일을 불러옵니다.
 
 (function () {
   function DataBase() {
-    let DB = {};
-    let DUMP = {};
+    let DB = {}; //데이터베이스
+    let DUMP = {}; //캐시
 
-    let LoadData = function () {
-      DB.Message = Common.read(Library.DBFileList["Message"]);
-      DB.UserList = Common.read(Library.FileList["UserList"]);
-      DB.AttenList = Common.read(Library.FileList["AttenList"]);
-      DB.SetList = Common.read(Library.FileList["SetList"]);
-      DB.StockList = Common.read(Library.FileList["StockList"]);
-      DB.PostList = Common.read(Library.FileList["PostList"]);
-      DB.RecordList = Common.read(Library.FileList["RecordList"]);
+    let LoadData = function () { //데이터 로드
+      DB.Message = Common.read(Library.DBFileList["Message"]); //메시지 데이터 로드
+      DB.UserList = Common.read(Library.FileList["UserList"]); //유저 데이터 로드
+      DB.AttenList = Common.read(Library.FileList["AttenList"]); //출석 데이터 로드
+      DB.SetList = Common.read(Library.FileList["SetList"]); //설정 데이터 로드
+      DB.StockList = Common.read(Library.FileList["StockList"]); //주식 데이터 로드
+      DB.PostList = Common.read(Library.FileList["PostList"]); //게시글 데이터 로드
+      DB.RecordList = Common.read(Library.FileList["RecordList"]); //기록 데이터 로드
       //Item
-      DB.BadgeItemList = Common.read(Library.FileList["BadgeItemList"]);
-      DB.TicketItemList = Common.read(Library.FileList["TicketItemList"]);
-      DB.FoodItemList = Common.read(Library.FileList["FoodItemList"]);
-      DB.MandrelItemList = Common.read(Library.FileList["MandrelItemList"]);
-      DB.MineralItemList = Common.read(Library.FileList["MineralItemList"]);
-      DB.StarsItemList = Common.read(Library.FileList["StarsItemList"]);
-      DB.LoanItemList = Common.read(Library.FileList["LoanList"]);
+      DB.BadgeItemList = Common.read(Library.FileList["BadgeItemList"]); //배지 데이터 로드
+      DB.TicketItemList = Common.read(Library.FileList["TicketItemList"]); //사용권 데이터 로드
+      DB.FoodItemList = Common.read(Library.FileList["FoodItemList"]); //음식 데이터 로드
+      DB.MandrelItemList = Common.read(Library.FileList["MandrelItemList"]); //곡괭이 데이터 로드
+      DB.MineralItemList = Common.read(Library.FileList["MineralItemList"]); //광석 데이터 로드
+      DB.StarsItemList = Common.read(Library.FileList["StarsItemList"]); //멤버쉽 데이터 로드
+      DB.LoanItemList = Common.read(Library.FileList["LoanList"]); //대출 데이터 로드
 
 
-      DUMP.Message = new Common.DumpModule();
-      DUMP.UserList = new Common.DumpModule();
-      DUMP.AttenList = new Common.DumpModule();
-      DUMP.SetList = new Common.DumpModule();
-      DUMP.StockList = new Common.DumpModule();
-      DUMP.PostList = new Common.DumpModule();
-      DUMP.RecordList = new Common.DumpModule();
+      DUMP.Message = new Common.DumpModule(); //메시지 캐시 생성
+      DUMP.UserList = new Common.DumpModule(); //유저 캐시 생성
+      DUMP.AttenList = new Common.DumpModule(); //출석 캐시 생성
+      DUMP.SetList = new Common.DumpModule(); //설정 캐시 생성
+      DUMP.StockList = new Common.DumpModule(); //주식 캐시 생성
+      DUMP.PostList = new Common.DumpModule(); //게시글 캐시 생성
+      DUMP.RecordList = new Common.DumpModule(); //기록 캐시 생성
       //Item
-      DUMP.BadgeItemList = new Common.DumpModule();
-      DUMP.TicketItemList = new Common.DumpModule();
-      DUMP.FoodItemList = new Common.DumpModule();
-      DUMP.MandrelItemList = new Common.DumpModule();
-      DUMP.MineralItemList = new Common.DumpModule();
-      DUMP.StarsItemList = new Common.DumpModule();
-      DUMP.LoanItemList = new Common.DumpModule();
+      DUMP.BadgeItemList = new Common.DumpModule(); //배지 캐시 생성
+      DUMP.TicketItemList = new Common.DumpModule(); //사용권 캐시 생성
+      DUMP.FoodItemList = new Common.DumpModule(); //음식 캐시 생성
+      DUMP.MandrelItemList = new Common.DumpModule(); //곡괭이 캐시 생성
+      DUMP.MineralItemList = new Common.DumpModule(); //광석 캐시 생성
+      DUMP.StarsItemList = new Common.DumpModule(); //멤버쉽 캐시 생성
+      DUMP.LoanItemList = new Common.DumpModule(); //대출 캐시 생성
     }();
 
     /**
@@ -95,11 +95,12 @@ let {
       return list; //찾은 데이터 반환
     }
 
-    let Dictionary = function (type, name) {
+    let Dictionary = function (type, name) { //아이템 정보 조회
       let rtnStr = `${name}을(를) 찾아봤어요.${Library.More}\n\n`;
+      // 아이템 분류에 따라 상품명, 가격, 설명 출력
 
       let itemType = "";
-      switch (type) {
+      switch (type) { //아이템 분류에 따라 itemType 설정
         case "BadgeItem":
           itemType = "배지";
           break;
@@ -128,24 +129,25 @@ let {
           `\t- 상품명 : ${obj["name"]}`,
           `\t- 가격 : ${obj["price"]}`,
           `\t- 설명 : ${obj["description"]}`
-        ].join("\n");
+        ].join("\n"); //아이템 정보 출력
 
-        let tmpObj = Find(type, "name", obj["upItem"]);
+        let tmpObj = Find(type, "name", obj["upItem"]); //상위 아이템 찾기
         if (tmpObj !== null) rtnStr += [
           `== 상위 상품 ==`,
           `\t- 아이템명 : ${tmpObj["name"]}`
-        ].join("\n");
+        ].join("\n"); //상위 아이템 정보 출력
       } else {
-        rtnStr += "해당 상품을 찾을 수 없어요.";
+        rtnStr += "해당 상품을 찾을 수 없어요."; //찾은 데이터가 없을 경우
       }
       return rtnStr;
     }
 
-    let SaleList = function (type) {
-      let list = FindList(type, "all");
+    let SaleList = function (type) { //판매 리스트 조회
+      let list = FindList(type, "all"); //type에 해당하는 모든 데이터 찾기
       let rtnStr = `${type} 분류의 상품이에요.${Library.More}\n\n`;
-      let itemType = "";
-      switch (type) {
+      // 아이템 분류에 따라 상품명, 가격, 설명 출력
+      let itemType = ""; //아이템 분류
+      switch (type) { //아이템 분류에 따라 itemType 설정
         case "BadgeItem":
           itemType = "배지";
           break;
@@ -165,16 +167,16 @@ let {
           itemType = "멤버쉽";
           break;
       }
-      for (let i = 0; i < list.length; i++) {
-        rtnStr += [
+      for (let i = 0; i < list.length; i++) { //list의 길이만큼 반복
+        rtnStr += [ 
           `[${list[i]["name"]}]`,
           `\t- 상품분류 : ${itemType}`,
           `\t- 상품명 : ${list[i]["name"]}`,
           `\t- 가격 : ${list[i]["price"]}`,
           `\t- 설명 : ${list[i]["description"]}`
-        ].join("\n");
+        ].join("\n"); //아이템 정보 출력
       }
-      return rtnStr;
+      return rtnStr; //판매 리스트 반환
     }
 
     return {
@@ -200,7 +202,7 @@ let {
 
       getSaleList: function (type) {
         return SaleList(type);
-      },
+      }, //판매 리스트 조회
 
       //배지
       getBadgeList: function () {

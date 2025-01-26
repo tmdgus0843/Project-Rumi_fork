@@ -58,7 +58,7 @@ let {
       return jsonArr;
     }
 
-    let CreateRecord = function (id, time) {
+    let CreateRecord = function (id) {
       let obj = {
         id: id,
         action: []
