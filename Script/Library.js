@@ -35,24 +35,24 @@
       }
     }
     return {
-      More: "\n200b".repeat(500),
+      More: "\n200b".repeat(500), // 더 보기 변수
       Time: function (type, time) {
         Time(type, time);
-      },
+      }, // ms를 각 타입에 맞게 변환하는 함수
 
-      AdminRoom: "TeamCloud 개발방",
-      CommandPrefix: "루미야",
+      AdminRoom: "TeamCloud 개발방", // 관리자방
+      CommandPrefix: "루미야", // 접두사
 
-      DumpTimeout: Time("m", 5),
+      DumpTimeout: Time("m", 5), // 덤프 타임아웃
 
-      BettingLimit: 99999000,
-      MaxRemittance: 999900,
-      MaxLoan: 999900,
-      BackupTime: Time("m", 20),
-      FavorabilityMaxCount: 999,
+      BettingLimit: 99999000, // 배팅 제한
+      MaxRemittance: 999900, // 송금 제한
+      MaxLoan: 999900, // 대출 제한
+      BackupTime: Time("m", 20), // 백업 주기
+      FavorabilityMaxCount: 999, // 호감도 최대치
 
-      rootPath: "sdcard/TeamCloud/",
-      FileList: {
+      rootPath: "sdcard/TeamCloud/", // 루트 경로
+      FileList: { // 파일 리스트
         UserList: "RumiData/Users/UserList.json",
         AttenList: "RumiData/Games/AttenList.json",
         SetList: "RumiData/ETCs/SetList.json",

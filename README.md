@@ -69,8 +69,189 @@ Notion: [프로젝트 상세 링크](https://www.notion.so/17f3998cbd06806db998f
 
 ## 6. 주요 코드
 
-### Libray
+### Libray ( module )
 기본적인 변수들을 담고있어요.
+```
+return {
+  변환 : More, Time()
+  관리 : AdminRoom, CommandPrefix
+  임시 데이터 : DumpTimeout
+  제한 : BettingLimit, MaxRemittance, MaxLoan, BackupTime, FavorabilityMaxCount
+  파일 : rootPath
+    - 저장 : FileList
+    - 데이터베이스 : DBFileList
+  아이템 타입 : ItemType
+}
+```
+
+### Common ( module )
+기본적인 함수들을 담고있어요.
+```
+return {
+  파일 : file(), read(), write(), remove()
+  랜덤 : Random(), RandomFloat()
+  로그 : logI(), LoeE()
+  임시 데이터: DumpModule
+    - removeDumpTimeout() : DumpModule의 데이터를 삭제하는 함수
+    - addDump() : DumpModule에 데이터를 추가하는 함수
+    - resetTimeStemp() : DumpModule의 데이터의 시간을 초기화하는 함수
+}
+```
+
+### DataBase ( module )
+데이터베이스 관련 함수들을 담고있어요.
+```
+변수 : DB, DUMP
+데이터 로드 : LoadData
+데이터 조회 : Find(), FindList()
+아이템 조회 : Dictionary(), SaleList()
+return {
+  데이터 조회 : Search(), Dic()
+  아이템 조회 : getItem(), isItem(), getItemByName(), getSaleList()
+  개별 아이템 조회 : (),
+}
+```
+
+### Object ( module )
+유저 관련 함수들을 담고있어요.
+```
+clsUser(): {
+인벤토리 : FindInventory()
+  return {
+    json : getJson()
+    코인 : getCoin(), setCoin(), addCoin()
+    아이템 : addItem(), removeItem(), getItemList(), isItem(), isItemCount()
+            useItem()
+    대출 : getLoan(), setLoan(), removeLoan()
+  }
+}
+clsUserRecord(): {
+  return {
+    json : getJson()
+    기록 : addRecord(), getRecord()
+  }
+}
+```
+
+### RecordManager ( module )
+기록 관련 함수들을 담고있어요.
+```
+변수 : recordList, recordDump
+데이터 로드 : LoadData
+데이터 조회 : Find()
+데이터 삭제 : Delete()
+JSON 변환 : MakeJson()
+기록 생성 : CreateRecord()
+저장 : Save()
+return {
+  기록 삭제 : Delete()
+  기록 생성 : CreateRecord()
+  기록 추가 : Record()
+}
+```
+
+### SystemManager ( module )
+시스템 관련 함수들을 담고있어요.
+```
+변수 : UserFile, PostFile, ItemType, DBFileList
+       DB, PostList, UserList
+데이터 로드 : LoadData
+데이터 조회 : Find(), FindItem()
+데이터 삭제 : Remove()
+유저 확인 : isUser()
+return {
+  우편 : getPostList(), sendPost(), removePost(), removePostAll()
+  유저 : isUserName(), getAllUser()
+}
+```
+
+### System ( Script )
+시스템 관리 파일이에요.
+```
+#25 - 본 코드는 관리자방이 아니면 실행되지 않아요.
+#27 - 메시지가 접두사로 시작하면
+#29 - 접두사 뒤에 "컴파일"을 입력하면 컴파일을 실행해요.
+#32 - 접두사 뒤에 "시작"을 입력하면 시스템을 시작해요.
+#40 - 접두사 뒤에 "종료"를 입력하면 시스템을 종료해요.
+#51 - 메시지가 공지라면 공지를 보내요.
+#78 - startComplie() : 컴파일
+```
+
+### UserManager ( module )
+유저 관리 관련 함수들을 담고있어요.
+```
+변수 : userList, userDump
+데이터 로드 : loadData
+유저 : Contain(), Find(), FindById(), CreateUser(), DeleteUser()
+json : MakeJson()
+저장 : Save()
+우편 : ReceivePost()
+return {
+  유저 : contain(), deleteUser(), makeUser(), UserInfo()
+         findUser(), findUserById()
+  상점 : Purchase(), Sell(), getSeleList()
+  사용 : UseItem()
+  우편 : ReceivePost(), RemoveAllPost()
+  코인 : RankingInfo()
+  은행 : getLoanList(), Loan(), calcLoan(), cancelLoan()
+  출석 : checkAtten()
+  주식 : getStcokList()
+  도박 : Betting()
+}
+```
+
+### Main ( Script )
+메인 파일이에요.
+```
+#28 - getRandom() : 배열에서 랜덤으로 값을 가져와요.
+#32 - botCallCount : 봇 호출 횟수를 저장해요.
+#37 - command() : 메시지가 `접두사 + 명령어`인지 확인해요.
+#38 - commandSW() : 메시지가 `접두사 + 명령어`로 시작하는지 확인해요.
+#44 - botMesage : 봇 메시지를 저장해요.
+#46 - 기본정보를 출력해요.
+#52 - 도움말을 출력해요.
+#57 - eval을 실행해요.
+#70 - UserCommand() : 유저 명령어를 실행해요.
+
+UserCommand() : {
+  #93 - command() : 메시지가 `접두사 + 명령어`인지 확인해요.
+  #96 - commandSW() : 메시지가 `접두사 + 명령어`로 시작하는지 확인해요.
+  #100 - 사용자를 등록해요.
+  #120 - 계정정보를 출력해요.
+  #123 - PlayCommand() : 기능을 실행해요.
+}
+
+PlayCommand() : {
+  #130 - command() : 메시지가 `접두사 + 명령어`인지 확인해요.
+  #133 - commandSW() : 메시지가 `접두사 + 명령어`로 시작하는지 확인해요.
+  #137 - splitMessage : 메시지를 띄어쓰기 단위로 나눠요.
+  #139 - botMesage : 봇 메시지를 저장해요.
+  #141 - msgReply() : 봇 메시지에서 대입해요.
+  #162 - commands : 봇 메시지에서 변환해요.
+  #258 - 메시지가 봇 메시지의 key값과 같다면 봇 메시지를 출력해요.
+  #261, #272 - 일정 횟수 이상 호출하면 특정 봇 메시지를 출력해요.
+  #288 - 식사해요.
+  #293 - 대출 목록을 출력해요.
+  #302 - 대출을 신청해요.
+  #309 - 대출을 정산해요.
+  #313 - 대출을 해지해요.
+  #318 - 아이템 구매 목록을 출력해요.
+  #327 - 아이템을 구매해요.
+  #335 - 아이템 판매 목록을 출력해요.
+  #347 - 아이템을 판매해요.
+  #356 - 아이템을 사용해요.
+  #369 - 돈을 베팅해요.
+  #378 - 출석을 체크해요.
+  #382 - 출석 순위를 출력해요.
+  #395 - 우편을 확인해요.
+  #415 - 우편을 받아요.
+  #427 - 우편을 모두 받아요.
+  #435 - 재화 순위를 출력해요.
+
+  #442 - checkNumberic() : 숫자인지 확인해요.
+  #447 - ChangeNumber() : 숫자로 변환해요.
+}
+```
 
 
 

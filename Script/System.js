@@ -24,7 +24,7 @@ let bot = BotManager.getCurrentBot();
 function onMessage(msg) {
   if (msg.room !== Library.AdminRoom) return;
 
-  if (msg.content == Library.Prefix) {
+  if (msg.content.startsWith(Library.Prefix)) {
     switch (msg.content.replace(`${Library.Prefix} `, "")[0]) {
       case "컴파일":
         startComplie();
