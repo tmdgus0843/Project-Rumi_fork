@@ -441,7 +441,8 @@ let {
         let interval = setInterval(() => {
           if (new Date().getHours() <= 9 || new Date().getHours() >= 21) return this.endStock()
           let stockList = this.getStockList();
-          Object.fromEntries(Object.entries(stockList).map(([key,value]) => [key, Math.random() > 0.5?value+=(Math.random() * value * 0.4):value-=(Math.random() * value * 0.4)]))
+          Common.write(Library.FileList["StockList"], Object.fromEntries(Object.entries(stockList).map(([key,value]) => [key, Math.random() > 0.5?value+=(Math.random() * value * 0.4):value-=(Math.random() * value * 0.4)])))
+
         }, 1000 * 60 * 10);
       },
       endStock: function () {
