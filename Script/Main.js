@@ -372,7 +372,7 @@ function PlayCommand(room, message, authorName, authorHash, reply) {
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     let itemName = splitMessage[2];
     let count = splitMessage[3];
-    if (itemName === undefined || !Number(count) === undefined) return reply(`명령어를 제대로 입력해주세요.`);
+    if (itemName === undefined || isNaN(count)) return reply(`명령어를 제대로 입력해주세요.`);
     reply(UserManager.Betting(authorHash, itemName, ChangeNumber(count)));
   }
 
