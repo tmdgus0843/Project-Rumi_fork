@@ -12,10 +12,6 @@ let {
   Common
 } = require("Common");
 
-importPackage(java.util);
-importPackage(java.util.zip);
-importPackage(java.io);
-
 let threadQueue = [];
 let BackupList = Library.FileList;
 
@@ -92,130 +88,6 @@ let BackupList = Library.FileList;
       return false;
     };
 
-
-    // GitHub API에서 최신 릴리즈 가져오기
-    let githubRelease = function () {
-      try {
-        const GITHUB_API_URL = `https://api.github.com/repos/teamcloud-office/project-rumi/releases`;
-
-        // Jsoup을 사용해 GET 요청 보내기
-        let releases = org.jsoup.Jsoup.connect(GITHUB_API_URL)
-          .header("Accept", "application/vnd.github+json")
-          .header("Authorization", `Bearer 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`)
-          .header("X-GitHub-Api-Version", "2022-11-28")
-          .ignoreContentType(true)
-          .ignoreHttpErrors(true)
-          .method(org.jsoup.Connection.Method.GET)
-          .execute()
-          .body();
-
-        if (releases.length() > 0) {
-          let latestRelease = JSON.parse(releases)[0]; // 가장 최신 릴리즈
-          return {
-            id: 200,
-            message: "Success",
-            releases_id: latestRelease.id,
-            name: latestRelease.name,
-            tag_name: latestRelease.tag_name,
-            date: latestRelease.published_at,
-            download: latestRelease.assets[0].browser_download_url,
-            body: latestRelease.body
-          };
-        }
-        return {
-          id: 404,
-          message: "No releases found"
-        };
-      } catch (e) {
-        return {
-          id: 400,
-          message: "Failed to fetch releases: " + e.message
-        };
-      }
-    };
-
-
-    let fileDownload = function (link, path, fileName) {
-      let url = new java.net.URL(link)
-      let Paths = java.nio.file.Paths
-      let Option = java.nio.file.StandardCopyOption;
-      let stream = url.openStream();
-      if (fileName === undefined) fileName = new Paths.get(url.getPath()).getFileName().toString();
-      let path = new Paths.get(path, fileName);
-      new java.nio.file.Files.copy(stream, path, Option.REPLACE_EXISTING);
-    };
-
-    let unZip = function (zip, path) {
-      let zipFile = new File("sdcard/TeamCloud/Project-Rumi/zips/" + zip);
-      let outputFolder = new File(path);
-      if (!outputFolder.exists()) {
-        outputFolder.mkdirs();
-      }
-      let fis = new FileInputStream(zipFile);
-      let zis = new ZipInputStream(fis);
-      let buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
-      let entry;
-      while ((entry = zis.getNextEntry()) != null) {
-        let newFile = new File(outputFolder, entry.getName());
-        if (entry.isDirectory()) {
-          newFile.mkdirs();
-        } else {
-          new File(newFile.getParent()).mkdirs();
-
-          let fos = new FileOutputStream(newFile);
-          let len;
-          while ((len = zis.read(buffer)) > 0) {
-            fos.write(buffer, 0, len);
-          }
-          fos.close();
-        }
-        zis.closeEntry();
-      }
-      zis.close();
-      fis.close();
-    };
-
-
-    let FileMove = function (file, version) {
-      for (let i = 0; i < file.length; i++) {
-        let type = "module";
-        let sourceFile = new File("/sdcard/TeamCloud/Project-Rumi/codes/" + version + "/script/" + file[i]);
-        if (["System.js", "Main.js"].includes(file[i])) type = "script";
-        let destFile = new File("/sdcard/MessagerBotR/" + (type === "script" ? "Bots/" + file[i].replace(".js", "") + "/" : "global_modules/") + file[i]);
-
-        if (!sourceFile.exists()) return;
-        let destDir = destFile.getParentFile();
-        if (!destDir.exists()) destDir.mkdirs();
-        let fis = new FileInputStream(sourceFile);
-        let fos = new FileOutputStream(destFile);
-        let buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
-        let bytesRead;
-        while ((bytesRead = fis.read(buffer)) !== -1) {
-          fos.write(buffer, 0, bytesRead);
-        }
-        fis.close();
-        fos.close();
-      }
-    }
-
-    let BackUp = function () {
-      let day = new Date();
-      let mkTwoNumber = function (num) {
-        return (num < 10 ? "0" + num : num);
-      }
-      let backupFolder = `${Library.rootPath}Backup/${mkTwoNumber(day.getFullYear())}/${mkTwoNumber(day.getMonth() + 1)}/${mkTwoNumber(day.getDate())}/${mkTwoNumber(day.getHours())}/${mkTwoNumber(day.getMinutes())}/`;
-
-      for (path in Library.FileList) {
-        FileStream.write(`${backupFolder}${Library.FileList[path]}`, FileStream.read(Library.rootPath + Library.FileList[path]));
-      }
-      for (path in Library.DBFileList) {
-        FileStream.write(`${backupFolder}${Library.DBFileList[path]}`, FileStream.read(Library.rootPath + Library.DBFileList[path]));
-      }
-      return `백업이 완료되었어요.`;
-    }
-
-
-
     return {
       getPostList: function (id) {
         for (let i = 0; i < PostList.length; i++) {
@@ -264,25 +136,6 @@ let BackupList = Library.FileList;
           rtnArr.push(UserList[i].name);
         }
         return rtnArr;
-      },
-
-
-      BackUp: function () {
-        return BackUp();
-      },
-
-
-      getRelease: function () {
-        return githubRelease();
-      },
-      getFileDownload: function (url, path, fileName) {
-        return fileDownload(url, path, fileName);
-      },
-      unZip: function (zip) {
-        return unZip(zip);
-      },
-      FileMove: function (file, version) {
-        return FileMove(file, version);
       }
     }
   }

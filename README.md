@@ -56,23 +56,10 @@ Notion: [프로젝트 상세 링크](https://www.notion.so/17f3998cbd06806db998f
 │ ├── 📄 UserManager.js       # 유저 담당 파일
 │ └── 📄 Main.js              # 메인 파일
 │
-├── 📂 RDB                            
-│ ├── 📂 DB                     ## Rumi DataBase
-│ │ ├── 📄 BadgeItem.json         # 뱃지 아이템 데이터
-│ │ ├── 📄 FoodItem.json          # 음식 아이템 데이터
-│ │ ├── 📄 MagicAnswer.json       # 마법의 루미님 데이터
-│ │ ├── 📄 Message.json           # 루미 대답 데이터
-│ │ ├── 📄 MembershipItem.json    # 멤버쉽 아이템 데이터
-│ │ └── 📄 TicketItem.json        # 티켓 아이템 데이터
-│ ├── 📂 ETCs                   ## Rumi ETC Data
-│ │ ├── 📄 RecordList.json        # 기록 데이터
-│ │ └── 📄 SetList.json           # 설정 데이터
-│ ├── 📂 Games                  ## Rumi Game Data
-│ │ └── 📄 StockList.json         # 주식 데이터
-│ ├── 📂 Users                  ## Rumi User Data
-│ │ ├── 📄 PostList.json          # 기록 데이터
-│ │ └── 📄 UserList.json          # 설정 데이터
-└── 🖼️ Rumi_ProfileImage.png    # 루미 메인 일러스트(2025년 기준)
+├── 📂 RDB                    ## Rumi DataBase
+│ ├── 📄
+│ └── 📄
+└── 🖼️ Rumi_ProfileImage.png          # 루미 메인 일러스트(2025년 기준)
 
 📂 Project-Rumi(Rooting)
 └── 🖼️ Rumi_ProfileImage.png          # 루미 메인 일러스트(2025년 기준)
@@ -89,8 +76,7 @@ return {
   변환 : More, Time()
   관리 : AdminRoom, CommandPrefix
   임시 데이터 : DumpTimeout
-  제한 : BettingLimit, MaxRemittance, MaxLoan, BackupTime,
-        FavorabilityMaxCount, BankTime
+  제한 : BettingLimit, MaxRemittance, MaxLoan, BackupTime, FavorabilityMaxCount
   파일 : rootPath
     - 저장 : FileList
     - 데이터베이스 : DBFileList
@@ -103,7 +89,7 @@ return {
 ```
 return {
   파일 : file(), read(), write(), remove()
-  랜덤 : Random(), RandomFloat(), RandomArray()
+  랜덤 : Random(), RandomFloat()
   로그 : logI(), LoeE()
   임시 데이터: DumpModule
     - removeDumpTimeout() : DumpModule의 데이터를 삭제하는 함수
@@ -173,13 +159,9 @@ return {
 데이터 조회 : Find(), FindItem()
 데이터 삭제 : Remove()
 유저 확인 : isUser()
-업데이트 : githubRelease(), fileDownload(), unZip(), FileMove()
-백업 : BackUp()
 return {
   우편 : getPostList(), sendPost(), removePost(), removePostAll()
   유저 : isUserName(), getAllUser()
-  백업 : BackUp()
-  업데이트 : getRelease(), getFileDownload(), unZip(), FileMove()
 }
 ```
 
@@ -192,9 +174,7 @@ return {
 #32 - 접두사 뒤에 "시작"을 입력하면 시스템을 시작해요.
 #40 - 접두사 뒤에 "종료"를 입력하면 시스템을 종료해요.
 #51 - 메시지가 공지라면 공지를 보내요.
-#76 ~ #99 - 시스템을 업데이트해요.
-#103 - 데이터베이스를 백업해요.
-#78 - startComplie() : 컴파일, 백업용 인터벌 초기화
+#78 - startComplie() : 컴파일
 ```
 
 ### UserManager ( module )
@@ -210,14 +190,12 @@ return {
   유저 : contain(), deleteUser(), makeUser(), UserInfo()
          findUser(), findUserById()
   상점 : Purchase(), Sell(), getSeleList()
-  날씨 : getWeather()
-  음악 : getMusicChart(), getMusicSearch(), getRandomMusic()
   사용 : UseItem()
   우편 : ReceivePost(), RemoveAllPost()
   코인 : RankingInfo()
   은행 : getLoanList(), Loan(), calcLoan(), cancelLoan()
   출석 : checkAtten()
-  주식 : getStcokList()
+  주식 : getStcokList(), buyStock(), sellStock(), startStock(), endStock()
   도박 : Betting()
 }
 ```
@@ -225,8 +203,56 @@ return {
 ### Main ( Script )
 메인 파일이에요.
 ```
-UserCommand()   :   사용자 등록, 계정정보 출력
-PlayCommand()   :   기능 수행
+#28 - getRandom() : 배열에서 랜덤으로 값을 가져와요.
+#32 - botCallCount : 봇 호출 횟수를 저장해요.
+#37 - command() : 메시지가 `접두사 + 명령어`인지 확인해요.
+#38 - commandSW() : 메시지가 `접두사 + 명령어`로 시작하는지 확인해요.
+#44 - botMesage : 봇 메시지를 저장해요.
+#46 - 기본정보를 출력해요.
+#52 - 도움말을 출력해요.
+#57 - eval을 실행해요.
+#70 - UserCommand() : 유저 명령어를 실행해요.
+
+UserCommand() : {
+  #93 - command() : 메시지가 `접두사 + 명령어`인지 확인해요.
+  #96 - commandSW() : 메시지가 `접두사 + 명령어`로 시작하는지 확인해요.
+  #100 - 사용자를 등록해요.
+  #120 - 계정정보를 출력해요.
+  #123 - PlayCommand() : 기능을 실행해요.
+}
+
+PlayCommand() : {
+  #130 - command() : 메시지가 `접두사 + 명령어`인지 확인해요.
+  #133 - commandSW() : 메시지가 `접두사 + 명령어`로 시작하는지 확인해요.
+  #137 - splitMessage : 메시지를 띄어쓰기 단위로 나눠요.
+  #139 - botMesage : 봇 메시지를 저장해요.
+  #141 - msgReply() : 봇 메시지에서 대입해요.
+  #162 - commands : 봇 메시지에서 변환해요.
+  #258 - 메시지가 봇 메시지의 key값과 같다면 봇 메시지를 출력해요.
+  #261, #272 - 일정 횟수 이상 호출하면 특정 봇 메시지를 출력해요.
+  #288 - 식사해요.
+  #293 - 대출 목록을 출력해요.
+  #302 - 대출을 신청해요.
+  #309 - 대출을 정산해요.
+  #313 - 대출을 해지해요.
+  #318 - 아이템 구매 목록을 출력해요.
+  #327 - 아이템을 구매해요.
+  #335 - 아이템 판매 목록을 출력해요.
+  #347 - 아이템을 판매해요.
+  #356 - 아이템을 사용해요.
+  #369 - 돈을 베팅해요.
+  #371 - 주식을 해요.
+  #391 - 출석을 체크해요.
+  #395 - 출석 순위를 출력해요.
+  #408 - 우편을 확인해요.
+  #428 - 우편을 받아요.
+  #440 - 우편을 모두 받아요.
+  #448 - 재화 순위를 출력해요.
+
+  #455 - checkNumberic() : 숫자인지 확인해요.
+  #460 - ChangeNumber() : 숫자로 변환해요.
+  #464 - onStartCompile() : -
+}
 ```
 
 
@@ -237,25 +263,25 @@ PlayCommand()   :   기능 수행
 
 ### 7-1 개발 전
 
-#### 1. 프로그램 설치.
+**1. 프로그램 설치**
 * [Git 설치하기](https://git-scm.com/downloads)
 * [GitHub Desktop 설치하기](https://central.github.com/deployments/desktop/desktop/latest/win32)
 
-#### 2. Repository Fork.
+**2. Repository Fork하기**
 * [Project-Rumi(GitHub)](https://github.com/TeamCloud-Office/Project-Rumi)에서 우측 상단의 `Fork`클릭하여 사본 만들기
 * **주의: 사본 만들때 Project-Rumi_fork로 이름 정하기**
 
-#### 3. GItHub Desktop 로그인.
+**3. GItHub Desktop 로그인하기**
 * File > Options...
 * GitHub 계정으로 로그인하기
 
-#### 4. Fork한 repository 가져오기.
+**4. Fork한 repository 가져오기**
 * `File` > `Clone repository` > `URL` > `https://github.com/(자신의_GitHub_Name)/Project-Rumi_fork.git` | `Local
 path(Repository가
 복제될 폴더)` > `Clone`
 * `To contribute to the parent project` > `Continue`
 
-#### 5. Local path에서 작업할 파일 편집.
+**5. Local path에서 작업할 파일 편집하기.**
 
 
 
@@ -270,7 +296,7 @@ path(Repository가
 6. PR을 보냈다면 카카오워크 `TEAMCLOUD`방에 알리기
 
 
-### 7-3. Commit 메시지 형식
+#### 7-3. Commit 메시지 형식
 | **타입** | **설명** | **예시** |
 | ------ | ------ | ------ |
 | plus | 새로운 기능 추가 | [plus] - 출석 기능 추가 |
@@ -288,6 +314,9 @@ path(Repository가
 
 ### 8-1. 코드 스타일
 ```javascript
+// 주석을 달때에는 주석을 달고자 하는 코드의 위에 달아주세요.
+// 주석을 달때에는 한 칸 띄고 작성해주세요.
+
 // 들여쓰기는 2칸으로 해주세요.
 
 function onMessage(msg) {
@@ -297,7 +326,7 @@ function onMessage(msg) {
     // 한줄코드를 지향해요.
     // 만약 한줄코드로 작성할 수 있다면 한줄코드로 작성해주세요.
     // 세미콜론을 꼭 달아주세요.
-    if (msg.content[1] === "에베벱") return msg.reply("반가워요");
+    if (msg.content[1] == "에베벱") return msg.reply("반가워요");
   }
 
   // 새로운 코드 작성시 한 줄 띄우고 작성해주세요.
@@ -329,3 +358,5 @@ function ABC(x, y) {
   //Code...
 }
 ```
+
+### 8-2.
