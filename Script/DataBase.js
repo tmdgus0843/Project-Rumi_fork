@@ -23,15 +23,13 @@ let {
       DB.AttenList = Common.read(Library.FileList["AttenList"]); //출석 데이터 로드
       DB.SetList = Common.read(Library.FileList["SetList"]); //설정 데이터 로드
       DB.StockList = Common.read(Library.FileList["StockList"]); //주식 데이터 로드
-      DB.PostList = Common.read(Library.FileList["PostList"]); //게시글 데이터 로드
+      DB.PostList = Common.read(Library.FileList["PostList"]); //우편 데이터 로드
       DB.RecordList = Common.read(Library.FileList["RecordList"]); //기록 데이터 로드
       //Item
       DB.BadgeItemList = Common.read(Library.FileList["BadgeItemList"]); //배지 데이터 로드
       DB.TicketItemList = Common.read(Library.FileList["TicketItemList"]); //사용권 데이터 로드
       DB.FoodItemList = Common.read(Library.FileList["FoodItemList"]); //음식 데이터 로드
-      DB.MandrelItemList = Common.read(Library.FileList["MandrelItemList"]); //곡괭이 데이터 로드
-      DB.MineralItemList = Common.read(Library.FileList["MineralItemList"]); //광석 데이터 로드
-      DB.StarsItemList = Common.read(Library.FileList["StarsItemList"]); //멤버쉽 데이터 로드
+      DB.MembershipItemList = Common.read(Library.FileList["MembershipItemList"]); //멤버쉽 데이터 로드
       DB.LoanItemList = Common.read(Library.FileList["LoanList"]); //대출 데이터 로드
 
 
@@ -40,15 +38,13 @@ let {
       DUMP.AttenList = new Common.DumpModule(); //출석 캐시 생성
       DUMP.SetList = new Common.DumpModule(); //설정 캐시 생성
       DUMP.StockList = new Common.DumpModule(); //주식 캐시 생성
-      DUMP.PostList = new Common.DumpModule(); //게시글 캐시 생성
+      DUMP.PostList = new Common.DumpModule(); //우편 캐시 생성
       DUMP.RecordList = new Common.DumpModule(); //기록 캐시 생성
       //Item
       DUMP.BadgeItemList = new Common.DumpModule(); //배지 캐시 생성
       DUMP.TicketItemList = new Common.DumpModule(); //사용권 캐시 생성
       DUMP.FoodItemList = new Common.DumpModule(); //음식 캐시 생성
-      DUMP.MandrelItemList = new Common.DumpModule(); //곡괭이 캐시 생성
-      DUMP.MineralItemList = new Common.DumpModule(); //광석 캐시 생성
-      DUMP.StarsItemList = new Common.DumpModule(); //멤버쉽 캐시 생성
+      DUMP.MembershipItemList = new Common.DumpModule(); //멤버쉽 캐시 생성
       DUMP.LoanItemList = new Common.DumpModule(); //대출 캐시 생성
     }();
 
@@ -101,23 +97,11 @@ let {
 
       let itemType = "";
       switch (type) { //아이템 분류에 따라 itemType 설정
-        case "BadgeItem":
-          itemType = "배지";
-          break;
         case "TicketItem":
           itemType = "사용권";
           break;
         case "FoodItem":
           itemType = "음식";
-          break;
-        case "MandrelItem":
-          itemType = "곡괭이";
-          break;
-        case "MineralItem":
-          itemType = "광석";
-          break;
-        case "StarsItem":
-          itemType = "멤버쉽";
           break;
       }
 
@@ -148,23 +132,11 @@ let {
       // 아이템 분류에 따라 상품명, 가격, 설명 출력
       let itemType = ""; //아이템 분류
       switch (type) { //아이템 분류에 따라 itemType 설정
-        case "BadgeItem":
-          itemType = "배지";
-          break;
         case "TicketItem":
           itemType = "사용권";
           break;
         case "FoodItem":
           itemType = "음식";
-          break;
-        case "MandrelItem":
-          itemType = "곡괭이";
-          break;
-        case "MineralItem":
-          itemType = "광석";
-          break;
-        case "StarsItem":
-          itemType = "멤버쉽";
           break;
       }
       for (let i = 0; i < list.length; i++) { //list의 길이만큼 반복
@@ -235,28 +207,6 @@ let {
       },
       getFoodByName: function (nameItem) {
         return Find("FoodItem", "name", nameItem);
-      },
-
-      //곡괭이
-      getMandrelList: function () {
-        return DB["MandrelItemList"];
-      },
-      getMandrel: function (index) {
-        return Find("MandrelItem", "index", index);
-      },
-      getMandrelByName: function (nameItem) {
-        return Find("MandrelItem", "name", nameItem);
-      },
-
-      //광물
-      getMineralList: function () {
-        return DB["MineralItemList"];
-      },
-      getMineral: function (index) {
-        return Find("MineralItem", "index", index);
-      },
-      getMineralByName: function (nameItem) {
-        return Find("MineralItem", "name", nameItem);
       },
 
       //멤버쉽

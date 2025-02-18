@@ -35,41 +35,43 @@
       }
     }
     return {
-      More: "\n200b".repeat(500), // 더 보기 변수
+      More: "\n200b".repeat(500), //더 보기 변수
       Time: function (type, time) {
         Time(type, time);
-      }, // ms를 각 타입에 맞게 변환하는 함수
+      }, //ms를 각 타입에 맞게 변환하는 함수
 
-      AdminRoom: "TeamCloud 개발방", // 관리자방
-      CommandPrefix: "루미야", // 접두사
+      AdminRoom: "TeamCloud 개발방", //관리자방
+      CommandPrefix: "루미야", //접두사
 
-      DumpTimeout: Time("m", 5), // 덤프 타임아웃
+      DumpTimeout: Time("m", 5), //덤프 타임아웃
 
-      BettingLimit: 99999000, // 배팅 제한
-      MaxRemittance: 999900, // 송금 제한
-      MaxLoan: 999900, // 대출 제한
-      BackupTime: Time("m", 20), // 백업 주기
-      FavorabilityMaxCount: 999, // 호감도 최대치
+      BettingLimit: 99999000, //배팅 제한
+      MaxRemittance: 999900, //송금 제한
+      MaxLoan: 999900, //대출 제한
+      BackupTime: Time("m", 20), //백업 주기
+      FavorabilityMaxCount: 999, //호감도 최대치
+      BankTime: [7, 22], //은행 시간
 
-      rootPath: "sdcard/TeamCloud/", // 루트 경로
-      FileList: { // 파일 리스트
-        UserList: "RumiData/Users/UserList.json",
-        AttenList: "RumiData/Games/AttenList.json",
-        SetList: "RumiData/ETCs/SetList.json",
-        StockList: "RumiData/Games/StockList.json",
-        PostList: "RumiData/Users/UserList.json",
-        RecordList: "RumiData/ETCs/RecordList.json"
+      rootPath: "sdcard/TeamCloud/Project-Rumi/", //루트 경로
+      FileList: { //파일 리스트
+        UserList: "Data/Users/UserList.json",
+        AttenList: "Data/Games/AttenList.json",
+        StockList: "Data/Games/StockList.json",
+        PostList: "Data/Users/UserList.json",
+        SetList: "Data/ETCs/SetList.json",
+        RecordList: "Data/ETCs/RecordList.json",
+        UpdateList: "Data/ETCs/UpdateList.json",
+        BackupList: "Data/ETCs/BackupList.json",
+        MagicAnswer: "Data/ETCs/MagicAnswer.json",
       },
 
       DBFileList: {
-        Message: "RumiData/DB/Message.json", //봇멘트
-        BadgeItem: "RumiData/DB/BadgeItem.json", //배지
-        MembershipItem: "RumiData/DB/Item.json", //멤버쉽
-        FoodItem: "RumiData/DB/FoodItem.json", //음식
-        TicketItem: "RumiData/DB/TicketItem.json", //교환권
-        MandrelItem: "RumiData/DB/MandrelItem.json", //곡괭이
-        MineralItem: "RumiData/DB/MineralItem.json", //광물
-        LoanItem: "RumiData/DB/LoanItem.json", //대출
+        Message: "Data/DB/Message.json", //봇멘트
+        BadgeItem: "Data/DB/BadgeItem.json", //배지
+        MembershipItem: "Data/DB/Item.json", //멤버쉽
+        FoodItem: "Data/DB/FoodItem.json", //음식
+        TicketItem: "Data/DB/TicketItem.json", //교환권
+        LoanItem: "Data/DB/LoanItem.json", //대출
       },
 
       ItemType: {

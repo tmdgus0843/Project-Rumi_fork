@@ -45,6 +45,9 @@ let threadQueue = []; //스레드 큐
       RandomFloat: function (start, end) { //랜덤 실수값을 반환합니다.
         return (start + Math.floor(Math.random() * (end - start + 1)));
       },
+      RandomArray: function (arr) { //랜덤 배열값을 반환합니다.
+        return arr[Math.floor(Math.random() * arr.length)];
+      },
 
       logI: function (funcName, data) { //정보 로그를 출력합니다.
         Log.i(`${funcName} func --- ${data}`);
