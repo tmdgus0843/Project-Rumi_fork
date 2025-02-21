@@ -33,6 +33,8 @@ let botCallCount = {};
 
 let bot = BotManager.getCurrentBot();
 
+UserManager.startStock()
+
 function onMessage(msg) {
   let command = (commandText) => {
     return msg.content === `${Library.CommandPrefix} ${commandText}`;
@@ -370,8 +372,19 @@ function PlayCommand(room, message, authorName, authorHash, reply) {
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     let itemName = splitMessage[2];
     let count = splitMessage[3];
-    if (itemName === undefined || !Number(count) === undefined) return reply(`명령어를 제대로 입력해주세요.`);
+    if (itemName === undefined || isNaN(count)) return reply(`명령어를 제대로 입력해주세요.`);
     reply(UserManager.Betting(authorHash, itemName, ChangeNumber(count)));
+  }
+
+  if (commandSW(`주식`)){
+    if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
+    let type = splitMessage[2];
+    let name = splitMessage[3];
+    let count = splitMessage[4];
+    if (!["현황","구매","판매"].includes(type) || name === undefined || isNaN(Number(count))) return reply(`명령어를 제대로 입력해주세요.`)
+    if (type == "현황") return reply(Object.entries(UserManager.getStockList()).map(([key,value]) => (key + " : " + value)).join("\n"))
+    if (type == "구매") return reply(UserManager.buyStock(authorHash, name, Number(count)))
+    if (type == "판매") return reply(UserManager.sellStock(authorHash, name, Number(count)))
   }
 
 
@@ -446,4 +459,8 @@ function checkNumberic(num) {
 
 function ChangeNumber(num) {
   return (checkNumberic(num) ? Math.floor(Number(num)) : 1);
+}
+
+function onStartCompile(){
+  UserManager.endStock()
 }

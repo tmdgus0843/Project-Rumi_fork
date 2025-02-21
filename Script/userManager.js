@@ -26,6 +26,7 @@ let {
   SystemManager
 } = require("SystemManager");
 
+
 (function () {
   function UserManager() {
     let userList = [];
@@ -82,13 +83,14 @@ let {
     }
 
     let CreateUser = function (name, profileId) {
+
       let obj = {
         name: name,
         id: Array.from({
-            length: 8
-          }, () =>
-          "abcdefghijklmnopqrstuvwxyz123456789" [
-            Math.floor(Math.random() * 35)
+          length: 8
+        }, () =>
+          "abcdefghijklmnopqrstuvwxyz123456789"[
+          Math.floor(Math.random() * 35)
           ]
         ).join(""), //랜덤 아이디 생성
         profileId: profileId,
@@ -102,6 +104,7 @@ let {
           mandrel: 0
         },
         chatCount: 0,
+        stock: Object.fromEntries(Object.entries(this.getStockList()).map(([key]) => [key, 0])),
         etc: {}
       };
       userList.push(clsUser(obj));
@@ -157,9 +160,9 @@ let {
           `\t- 정지 : ${user.ban ? "정지됨" : "정지안됨"}`,
           `\t- 경고 : ${user.warn}`,
           `\t- 코인 : ${user.coin}스타`,
+          // `\t- 주식 : ${Object.entries(user.stock).map(([key,value]) => value>0?(key + " : " + value):"").join("       \n")}`
         ].join("\n");
       },
-
 
       Purchase: function (id, type, name, count) { //구매
         let user = Find(id);
@@ -171,7 +174,7 @@ let {
           user.addItem(type, name, count);
           Save();
           return [`${targetItem["itemName"]}을(를) ${count}개 구매했어요.`,
-            `${(Number(targetItem["coin"]) * count)}스타를 소모했어요.`
+          `${(Number(targetItem["coin"]) * count)}스타를 소모했어요.`
           ].join("\n");
         } else {
           return "소지하고 있는 재화가 부족해요.";
@@ -245,7 +248,7 @@ let {
         let user = Find(id);
         let rtnStr = "",
           post;
-        if (user === null) `생성된 계정이 없어요.`;
+        if (user === null)`생성된 계정이 없어요.`;
         for (let i = 0; i < postlist.length; i++) {
           post = postlist[i];
           rtnStr += RecivePost(user, post.item, post.coin)
@@ -299,13 +302,13 @@ let {
         let user = Find(id);
         if (user === null) return `생성된 계정이 없어요.`;
         let DBLoan = DataBase.getLoanList();
-        let rtnArr =[];
+        let rtnArr = [];
         if (new Date().getHours() <= 9 || new Date().getHours() >= 21) return "은행 업무를 볼 수 있는 시간이 아니에요.";
         for (let i = 0; i < DBLoan.length; i++) {
           rtnArr.push([
             `[${DBLoan[i].name}]`,
             `\t- 기간: ${DBLoan[i].period}일`,
-            `\t- 금리: ${Math.floor(Number(DBLoan[i].rate)*100)}%)`
+            `\t- 금리: ${Math.floor(Number(DBLoan[i].rate) * 100)}%)`
           ].join("\n"));
         }
         return [
@@ -392,15 +395,69 @@ let {
           return `${time}에 출석을 했어요. 오늘 ${room}에서 1등으로 출석했어요.`;
         };
         Common.write(Library.FileList.AttenList, data);
-        `${time}에 출석을 했어요. 오늘 ${room}에서 ${rank}등으로 출석했어요.`;
+        return `${time}에 출석을 했어요. 오늘 ${room}에서 ${rank}등으로 출석했어요.`;
       },
 
 
       //주식 코드
+      interval: undefined,
+      dealy: undefined,
       getStockList: function () {
         let stockList = DataBase.getStockList();
-        //다시 작성
+        return stockList;
       },
+      buyStock: function (id, target, number) {
+        let user = Find(id);
+        if (user === null) return `생성된 계정이 없어요.`;
+
+        let stockList = this.getStockList();
+        if (!Object.keys(stockList).incluses(target)) return `존재하지않는 주식명이에요.`;
+
+        if (user.coin < (stockList[target] * number)) return `소지하고 있는 재화가 부족해요.`;
+
+        if (new Date().getHours() <= 9 || new Date().getHours() >= 21) return "은행 업무를 볼 수 있는 시간이 아니에요.";
+
+        user.coin -= (stockList[target] * number);
+        user.stock[target] += number;
+        return `${target} ${number}주 구매가 완료되었습니다.`;
+
+      },
+      sellStock: function (id, target, number) {
+        let user = Find(id);
+        if (user === null) return `생성된 계정이 없어요.`;
+
+        let stockList = this.getStockList();
+        if (!Object.keys(stockList).incluses(target)) return `존재하지않는 주식명이에요.`;
+
+        if (user.stock[target] < number) return `소지하고 있는 재화가 부족해요.`;
+
+        if (new Date().getHours() <= 9 || new Date().getHours() >= 21) return "은행 업무를 볼 수 있는 시간이 아니에요.";
+
+        user.coin += (stockList[target] * number);
+        user.stock[target] -= number;
+        return `${target} ${number}주 판매가 완료되었습니다.`;
+      },
+      startStock: function () {
+        let interval = setInterval(() => {
+          if (new Date().getHours() <= 9 || new Date().getHours() >= 21) return this.endStock()
+          let stockList = this.getStockList();
+          Common.write(Library.FileList["StockList"], Object.fromEntries(Object.entries(stockList).map(([key,value]) => [key, Math.random() > 0.5?value+=(Math.random() * value * 0.4):value-=(Math.random() * value * 0.4)])))
+
+        }, 1000 * 60 * 10);
+      },
+      endStock: function () {
+        clearInterval(interval)
+        clearInterval(dealy)
+        const tomorrow = new Date();
+        tomorrow.setDate(now.getDate() + 1);
+        tomorrow.setHours(9, 0, 0, 0);
+
+        dealy = setTimeout(() => {
+          UserManager.startStock()
+        }, tomorrow - new Date());
+
+      },
+
 
 
       //도박 코드
@@ -452,7 +509,7 @@ let {
 
 
 
-      
+
       findUser: function (id) {
         return Find(id);
       },

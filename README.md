@@ -195,7 +195,7 @@ return {
   코인 : RankingInfo()
   은행 : getLoanList(), Loan(), calcLoan(), cancelLoan()
   출석 : checkAtten()
-  주식 : getStcokList()
+  주식 : getStcokList(), buyStock(), sellStock(), startStock(), endStock()
   도박 : Betting()
 }
 ```
@@ -241,15 +241,17 @@ PlayCommand() : {
   #347 - 아이템을 판매해요.
   #356 - 아이템을 사용해요.
   #369 - 돈을 베팅해요.
-  #378 - 출석을 체크해요.
-  #382 - 출석 순위를 출력해요.
-  #395 - 우편을 확인해요.
-  #415 - 우편을 받아요.
-  #427 - 우편을 모두 받아요.
-  #435 - 재화 순위를 출력해요.
+  #371 - 주식을 해요.
+  #391 - 출석을 체크해요.
+  #395 - 출석 순위를 출력해요.
+  #408 - 우편을 확인해요.
+  #428 - 우편을 받아요.
+  #440 - 우편을 모두 받아요.
+  #448 - 재화 순위를 출력해요.
 
-  #442 - checkNumberic() : 숫자인지 확인해요.
-  #447 - ChangeNumber() : 숫자로 변환해요.
+  #455 - checkNumberic() : 숫자인지 확인해요.
+  #460 - ChangeNumber() : 숫자로 변환해요.
+  #464 - onStartCompile() : -
 }
 ```
 
