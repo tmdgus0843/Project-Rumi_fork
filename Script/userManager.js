@@ -83,16 +83,11 @@ let {
     }
 
     let CreateUser = function (name, profileId) {
-
       let obj = {
         name: name,
         id: Array.from({
-          length: 8
-        }, () =>
-          "abcdefghijklmnopqrstuvwxyz123456789"[
-          Math.floor(Math.random() * 35)
-          ]
-        ).join(""), //랜덤 아이디 생성
+          length: 6
+        }, () => ["1", "2", "3", "4", "5", ",6", "7", "8", "9"][Math.floor(Math.random() * 35)]).join(""), //랜덤 아이디 생성
         profileId: profileId,
         signUpDate: [new Date().getFullYear(), new Date().getMonth(), new Date().getDay()],
         admin: false,
@@ -120,18 +115,20 @@ let {
     }
 
     let RecivePost = function (user, item, coin) {
-      let rtnStr = "",
-        Item;
-      for (let i = 0; i < item.length; i++) {
-        Item = item[i];
-        user.addItem(Item.type, Item.name, Item.count);
-        rtnStr += `${Item.name}을(를) ${Item.count}개 받았어요.\n`;
+      let rtnStr = [];
+      if (item !== undefined) {
+        for (let i = 0; i < item.length; i++) {
+          user.addItem(item[i].type, item[i].name, item[i].count);
+          rtnStr.push(`${item[i].name}을(를) ${item[i].count}개 받았어요.`);
+        }
       }
-      if (Number(coin) > 0) {
+      if (coin !== undefined) {
         user.addCoin(Number(coin));
-        rtnStr += `${coin}스타를 받았어요.`;
+        if (Number(coin) > 0) rtnStr.push(`${coin}스타를 받았어요.`);
+        if (Number(coin) < 0) rtnStr.push(`${coin}스타를 회수했어요.`);
       }
-      return rtnStr;
+      Save();
+      return rtnStr.join("\n");
     }
 
     return {
@@ -160,9 +157,11 @@ let {
           `\t- 정지 : ${user.ban ? "정지됨" : "정지안됨"}`,
           `\t- 경고 : ${user.warn}`,
           `\t- 코인 : ${user.coin}스타`,
-          // `\t- 주식 : ${Object.entries(user.stock).map(([key,value]) => value>0?(key + " : " + value):"").join("       \n")}`
+          `\t- 채팅 수 : ${user.chatCount}회`,
+          `\t- 주식 : ${Object.entries(user.stock).map(([key, value]) => value > 0 ? (`${key} : ${value}`): "").join(", ")}`,
         ].join("\n");
       },
+
 
       Purchase: function (id, type, name, count) { //구매
         let user = Find(id);
@@ -174,45 +173,120 @@ let {
           user.addItem(type, name, count);
           Save();
           return [`${targetItem["itemName"]}을(를) ${count}개 구매했어요.`,
-          `${(Number(targetItem["coin"]) * count)}스타를 소모했어요.`
+            `${(Number(targetItem["coin"]) * count)}스타를 소모했어요.`
           ].join("\n");
         } else {
           return "소지하고 있는 재화가 부족해요.";
         }
       },
-      Sell: function (id, type, name, count) { //판매
+
+
+      //날씨
+      getWeather: function (id, location) {
         let user = Find(id);
         if (user === null) return `생성된 계정이 없어요.`;
 
-        let targetItem = DataBase.Search(type, "name", name);
-        if (targetItem === null) return `존재하지 않는 아이템이에요.`;
-        if (user.isItemCount(type, name, count)) {
-          let sellPrice = Math.floor(Number(targetItem["price"]) * 2 / 3);
-          if (sellPrice < 1) sellPrice = 1;
-          user.addCoin(sellPrice * count);
-          user.removeItem(type, name, count);
-          Save();
-          return `${targetItem["itemName"]}을(를) 원가의 ⅔의 가격인 ${sellPrice}스타에 판매했어요.`
-        } else {
-          return "해당 수량만큼의 아이템이 없어 판매할 수 없어요.";
-        }
+        let weather = org.jsoup.Jsoup.connect(`https://search.naver.com/search.naver?&query=${location}+날씨`).ignoreHttpErrors(true).get();
+        if (!weather.select("span.text").text().includes("기상청")) return `해당 지역의 날씨 정보를 찾을 수 없어요.(날씨 기능은 국내만 지원해요.)`;
+        return [
+          `${weather.select("div.title_area._area_panel").select("h2.title").text()}(${weather.select("div.title_area._area_panel").select("span.select_txt_sub").text()})의 날씨에 대해 알려드릴게요.`,
+          `해당 지역은 날씨가 ${weather.select("span.weather.before_slash").text()}이에요.`,
+          `온도: ${weather.select("div._today").select("div.temperature_text").text().replace("현재 온도", "")}`,
+          `(${(weather.select("span.temperature.up").text() === undefined) ? "어제보다 " + weather.select("span.temperature.down").text() : "어제보다 " + weather.select("span.temperature.up").text()})`,
+          `체감온도는 ${weather.select("dd.desc")[0].text()}에요.`,
+          `습도는 ${weather.select("dd.desc")[1].text()}에요.`,
+          `${weather.select("dt.term")[2].text()}은 ${weather.select("dd.desc")[2].text()}에요.`,
+          `미세먼지는 ${weather.select("span.txt")[0].text()}이고, 초미세먼지는 ${weather.select("span.txt")[1].text()}이에요.`,
+          `자외선은 ${weather.select("span.txt")[2].text()}이에요.`,
+          `오늘의 ${weather.select("strong.title")[3].text()}은 ${weather.select("span.txt")[3].text()}이에요.`,
+          `해당 정보는 대한민국 기상청에서 제공하는 정보에요.`
+        ].join("\n");
       },
+
+
+      //음악
+      getMusicChart: function (id) {
+        let user = Find(id);
+        if (user === null) return `생성된 계정이 없어요.`;
+
+        let music = org.jsoup.Jsoup.connect(`https://www.melon.com/chart/`).ignoreHttpErrors(true).get();
+        let musicList = [];
+        let date = music.select("span.year").text() + " " + music.select("span.hour").text();
+        let title = music.select("tr.lst50")[0].select("div.ellipsis.rank01").text();
+        let singer = music.select("tr.lst50")[0].select("div.ellipsis.rank02").text();
+        for (let i = 0; i < 100; i++) {
+          musicList.push(`${i + 1}위 : ${title} - ${singer}`);
+        }
+        return [
+          `${date} 기준, 멜론 차트 100위까지 알려드릴게요.`,
+          Library.More,
+          musicList.join("\n")
+        ].join("\n");
+        // 기준 : music.select("span.year").text() + " " + music.select("span.hour").text()
+        // title : music.select("tr.lst50")[0].select("div.ellipsis.rank01").text()
+        // singer : music.select("tr.lst50")[0].select("div.ellipsis.rank02").text()
+        // album : music.select("tr.lst50")[0].select("div.ellipsis.rank03").text()
+        // image : music.select("tr.lst50")[0].select("a.image_typeAll img").first().attr("src").replace("/melon/resize/120/quality/80/optimize","")
+      },
+      getMusicSearch: function (id, song) {
+        let user = Find(id);
+        if (user === null) return `생성된 계정이 없어요.`;
+
+        let music = org.jsoup.Jsoup.connect(`https://www.melon.com/search/keyword/index.json?j&query=${song}`)
+          .ignoreHttpErrors(true)
+          .ignoreContentType(true)
+          .execute()
+          .body()["SONGCONTENTS"][0];
+
+        let musicLyrics = org.jsoup.Jsoup.connect(`https://www.melon.com/song/detail.htm?songId=${music["SONGID"]}`)
+          .ignoreHttpErrors(true)
+          .get()
+          .select("div#d_video_summary")
+          .html()
+          .split("--> ")[1]
+          .replace(/<br>/g, "");
+        return [
+          [
+            `${music["ARTISTNAME"]}의 ${music["SONGNAME"]} 노래 가사에요.`,
+            Library.More,
+            `${musicLyrics}`
+          ].join("\n"),
+          music["ALBUMIMG"].replace("/melon/resize/40/quality/80/optimize", "") //jpg
+        ];
+
+        // title : music["SONGNAME"]
+        // singer : music["ARTISTNAME"]
+        // album : music["ALBUMNAME"]
+        // image : music["ALBUMIMG"].replace("/melon/resize/40/quality/80/optimize", "")
+        // songid : music["SONGID"]
+      },
+      getRandomMusic: function (id) {
+        let user = Find(id);
+        if (user === null) return `생성된 계정이 없어요.`;
+
+        let music = org.jsoup.Jsoup.connect(`https://www.melon.com/chart/`).ignoreHttpErrors(true).get();
+        let random = Common.Random(0, 100);
+        let title = music.select("tr.lst50")[random].select("div.ellipsis.rank01").text();
+        let singer = music.select("tr.lst50")[random].select("div.ellipsis.rank02").text();
+        return [`${singer}의 ${title}은 어떠세요?`, `${singer}의 ${title}을(를) 추천해요.`];
+      },
+
 
 
       /**
        * 
-       * @param {String} id 
-       * @param {String} name 
-       * @param {Array} funcCall [0] fuction, [1] String
+       * @param {String} id 사용자 아이디
+       * @param {String} index 상품번호 
        * @returns 
        */
-      UseItem: function (id, name, funcCall) {
+      UseItem: function (id, index) {
         let user = Find(id);
         if (user === null) return `생성된 계정이 없어요.`;
-        let DBItem = DataBase.getItem(name);
+        let DBItem = DataBase.getItem(index);
         if (DBItem === null) return `존재하지 않는 아이템이에요.`;
         if (user.isItemCount(DBItem.type, DBItem.name, 1)) {
           let itemType = "";
+          let result = "";
           switch (DBItem.type) {
             case "TicketItem":
               itemType = "사용권";
@@ -224,11 +298,11 @@ let {
               itemType = "멤버쉽";
               break;
           }
-          funcCall[0];
+          user.useItem(DBItem.type, DBItem.name);
           Save();
           return [
             `${DBItem.name}을(를) 사용했어요.`,
-            funcCall[1]
+            result
           ].join("\n");
         } else {
           return "해당 아이템을 보유하고 있지 않아요.";
@@ -240,21 +314,16 @@ let {
       RecivePost: function (id, item, coin) {
         let user = Find(id);
         if (user === null) return `생성된 계정이 없어요.`;
-        let rtnStr = RecivePost(user, item, coin);
-        Save();
-        return rtnStr;
+        return RecivePost(user, item, coin);
       },
-      ReciveAllPost: function (id, postlist) {
+      ReciveAllPost: function (id, postList) {
         let user = Find(id);
-        let rtnStr = "",
-          post;
-        if (user === null)`생성된 계정이 없어요.`;
-        for (let i = 0; i < postlist.length; i++) {
-          post = postlist[i];
-          rtnStr += RecivePost(user, post.item, post.coin)
+        let rtnStr = [];
+        if (user === null) return `생성된 계정이 없어요.`;
+        for (let i = 0; i < postList.length; i++) {
+          rtnStr.push(RecivePost(user, postList[i].item, postList[i].coin));
         }
-        Save();
-        return rtnStr;
+        return rtnStr.join("\n");
       },
 
 
@@ -297,13 +366,69 @@ let {
       },
 
 
+      //로또 코드
+      buyLotto: function (id, count) {
+        let user = Find(id);
+        if (user === null) return `생성된 계정이 없어요.`;
+        if (user.getItemList("lotto")) return "이미 로또를 구매하셨어요.";
+        let lottoList = [];
+        for (let i = 0; i < count; i++) {
+          let lotto = [];
+          for (let j = 0; j < 7; j++) {
+            lotto.push(Common.Random(1, 45));
+          }
+          lottoList.push(lotto);
+        }
+        user.addCoin(-(1000 * count));
+        user.addItem("lotto", lottoList);
+        Save();
+        let rtnArr = [];
+        for (let i = 0; i < lottoList.length; i++) {
+          rtnArr.push(`${i+1} : ${lottoList[i].join(", ")}`);
+        }
+        return [
+          `로또를 구매했어요.`,
+          `${rtnArr.join("\n")}`
+        ].join("\n");
+      },
+      getLottoRecord: function (id, count) {
+        let user = Find(id);
+        if (user === null) return `생성된 계정이 없어요.`;
+        if (count > Common.read(Library.FileList.LottoList).length) return "존재하지 않는 회차에요.";
+        let lottoList = Common.read(Library.FileList.LottoList);
+        return [
+          `제 ${count}회 구름로또 당첨 번호는 [${lottoList[count-1].lotto.join(", ")}]이에요.`,
+          `보너스 번호는 [${lottoList[count-1].bonus}]이에요.`
+        ]
+      },
+      lottoCheck: function (id, count) {
+        let user = Find(id);
+        if (user === null) return `생성된 계정이 없어요.`;
+        let lotto = [];
+        for (let j = 0; j < 7; j++) {
+          lotto.push(Common.Random(1, 45));
+        }
+        let bonus = Common.Random(1, 45);
+        let lottoList = Common.read(Library.FileList.LottoList);
+        lottoList.push({
+          lotto: lotto,
+          bonus: bonus
+        });
+        Common.write(Library.FileList.LottoList, lottoList) //로또 번호 저장
+        return [
+          `제 ${count}회 구름로또 당첨 번호는 [${lotto.join(", ")}]이에요.`,
+          `보너스 번호는 [${bonus}]이에요.`
+        ].join("\n");
+      },
+
+
       //은행 코드
       getLoanList: function (id) {
         let user = Find(id);
         if (user === null) return `생성된 계정이 없어요.`;
         let DBLoan = DataBase.getLoanList();
         let rtnArr = [];
-        if (new Date().getHours() <= 9 || new Date().getHours() >= 21) return "은행 업무를 볼 수 있는 시간이 아니에요.";
+        if (new Date().getHours() <= Library.BankTime[0] || new Date().getHours() >= Library.BankTime[1]) return "은행 업무를 볼 수 있는 시간이 아니에요.";
         for (let i = 0; i < DBLoan.length; i++) {
           rtnArr.push([
             `[${DBLoan[i].name}]`,
@@ -320,10 +445,10 @@ let {
         let user = Find(id);
         if (user === null) return `생성된 계정이 없어요.`;
         let DBLoan = DataBase.getLoanByName(target);
-        if (new Date().getHours() <= 9 || new Date().getHours() >= 21) return "은행 업무를 볼 수 있는 시간이 아니에요.";
+        if (new Date().getHours() <= Library.BankTime[0] || new Date().getHours() >= Library.BankTime[1]) return "은행 업무를 볼 수 있는 시간이 아니에요.";
         if (Library.MaxLoan < coin) return `대출 한도를 초과했어요. 대출 한도는 ${Library.MaxLoan}스타에요.`;
         if (DBLoan === null) return "존재하지 않는 대출 상품이에요.";
-        if (user.loan["index"] !== "") return "이미 대출을 받으셨으므로 더이상 은행 업무를 보실 수 없어요. 대출을 갚으신 후 다시 시도해주세요.";
+        if (user.loan["index"] !== "") return "이미 대출을 받아서 더이상 은행 업무를 볼 수 없어요. 대출을 갚은 후 다시 시도해주세요.";
         user.addCoin(coin);
         Save();
         return [
@@ -338,10 +463,10 @@ let {
         if (user === null) return `생성된 계정이 없어요.`;
         let loan = user.loan;
         let DBLoan = DataBase.getLoan(loan.index);
-        if (new Date().getHours() <= 9 || new Date().getHours() >= 21) return "은행 업무를 볼 수 있는 시간이 아니에요.";
+        if (new Date().getHours() <= Library.BankTime[0] || new Date().getHours() >= Library.BankTime[1]) return "은행 업무를 볼 수 있는 시간이 아니에요.";
         let remainTime = loan.time + (Number(DBLoan.period) * 24 * 60 * 60 * 1000) - (new Date()).getTime();
         if (remainTime > 0) return `아직 대출 기간이 남았어요. ${Math.floor(remainTime / (24 * 60 * 60 * 1000))}일 후에 정산해주세요.`;
-        if (loan.index === "") return "대출을 받지 않으셨어요.";
+        if (loan.index === "") return "대출을 받지 않았어요.";
         let calcCoin = Math.floor(loan.coin * (1 + Number(DBLoan.rate)));
         if (calcCoin > user.coin) return "소지하고 있는 재화가 부족해요.";
         user.addCoin(-calcCoin);
@@ -356,9 +481,9 @@ let {
         let user = Find(id);
         if (user === null) return `생성된 계정이 없어요.`;
         let loan = user.loan;
-        if (loan.index === "") return "대출을 받지 않으셨어요.";
+        if (loan.index === "") return "대출을 받지 않았어요.";
         let DBLoan = DataBase.getLoan(loan.index);
-        if (new Date().getHours() <= 9 || new Date().getHours() >= 21) return "은행 업무를 볼 수 있는 시간이 아니에요.";
+        if (new Date().getHours() <= Library.BankTime[0] || new Date().getHours() >= Library.BankTime[1]) return "은행 업무를 볼 수 있는 시간이 아니에요.";
         let calcCoin = Math.floor(loan.coin * (1 + Number(DBLoan.rate)));
         if (calcCoin > user.coin) return "소지하고 있는 재화가 부족해요.";
         user.addCoin(-calcCoin);
@@ -366,6 +491,21 @@ let {
         return [
           `현재 대출을 해지할게요. 중도해지라도 이자를 차감해요.`,
           `${calcCoin}스타를 갚았어요.`
+        ].join('\n');
+      },
+      Remittance: function (id, target, coin) {
+        let user = Find(id);
+        if (user === null) return `생성된 계정이 없어요.`;
+        if (new Date().getHours() <= Library.BankTime[0] || new Date().getHours() >= Library.BankTime[1]) return "은행 업무를 볼 수 있는 시간이 아니에요.";
+        let targetUser = Find(target);
+        if (targetUser === null) return `존재하지 않는 계정이에요.`;
+        if (coin > user.coin) return "소지하고 있는 재화가 부족해요.";
+        if (coin > Library.MaxRemittance) return `송금 한도를 초과했어요. 송금 한도는 ${Library.MaxRemittance}스타에요.`;
+        user.addCoin(-coin);
+        targetUser.addCoin(coin);
+        Save();
+        return [
+          `${targetUser.name}님에게 ${coin}스타를 송금했어요.`
         ].join('\n');
       },
 
@@ -401,63 +541,54 @@ let {
 
       //주식 코드
       interval: undefined,
-      dealy: undefined,
+      delay: undefined,
       getStockList: function () {
-        let stockList = DataBase.getStockList();
-        return stockList;
+        return DataBase.getStockList();
       },
       buyStock: function (id, target, number) {
         let user = Find(id);
         if (user === null) return `생성된 계정이 없어요.`;
 
         let stockList = this.getStockList();
-        if (!Object.keys(stockList).incluses(target)) return `존재하지않는 주식명이에요.`;
-
-        if (user.coin < (stockList[target] * number)) return `소지하고 있는 재화가 부족해요.`;
-
-        if (new Date().getHours() <= 9 || new Date().getHours() >= 21) return "은행 업무를 볼 수 있는 시간이 아니에요.";
+        if (!Object.keys(stockList).includes(target)) return "존재하지 않는 주식명이에요.";
+        if (user.coin < (stockList[target] * number)) return "소지하고 있는 재화가 부족해요.";
+        if (new Date().getHours() <= Library.BankTime[0] || new Date().getHours() >= Library.BankTime[1]) return "은행 업무를 볼 수 있는 시간이 아니에요.";
 
         user.coin -= (stockList[target] * number);
         user.stock[target] += number;
-        return `${target} ${number}주 구매가 완료되었습니다.`;
-
+        return `${target} ${number}주를 구매했어요.`;
       },
       sellStock: function (id, target, number) {
         let user = Find(id);
         if (user === null) return `생성된 계정이 없어요.`;
 
         let stockList = this.getStockList();
-        if (!Object.keys(stockList).incluses(target)) return `존재하지않는 주식명이에요.`;
-
-        if (user.stock[target] < number) return `소지하고 있는 재화가 부족해요.`;
-
-        if (new Date().getHours() <= 9 || new Date().getHours() >= 21) return "은행 업무를 볼 수 있는 시간이 아니에요.";
+        if (!Object.keys(stockList).includes(target)) return "존재하지 않는 주식명이에요.";
+        if (user.stock[target] < number) return "소지하고 있는 주식이 부족해요.";
+        if (new Date().getHours() <= Library.BankTime[0] || new Date().getHours() >= Library.BankTime[1]) return "은행 업무를 볼 수 있는 시간이 아니에요.";
 
         user.coin += (stockList[target] * number);
         user.stock[target] -= number;
-        return `${target} ${number}주 판매가 완료되었습니다.`;
+        return `${target} ${number}주를 판매했어요.`;
       },
       startStock: function () {
-        let interval = setInterval(() => {
-          if (new Date().getHours() <= 9 || new Date().getHours() >= 21) return this.endStock()
+        this.interval = setInterval(() => {
+          if (new Date().getHours() <= Library.BankTime[0] || new Date().getHours() >= Library.BankTime[1]) return this.endStock();
           let stockList = this.getStockList();
-          Common.write(Library.FileList["StockList"], Object.fromEntries(Object.entries(stockList).map(([key,value]) => [key, Math.random() > 0.5?value+=(Math.random() * value * 0.4):value-=(Math.random() * value * 0.4)])))
-
+          Common.write(Library.FileList["StockList"], Object.fromEntries(Object.entries(stockList).map(([key, value]) => [key, Math.random() > 0.5 ? value += (Math.random() * value * 0.4) : value -= (Math.random() * value * 0.4)])));
         }, 1000 * 60 * 10);
       },
       endStock: function () {
-        clearInterval(interval)
-        clearInterval(dealy)
+        clearInterval(this.interval);
+        clearInterval(this.delay)
         const tomorrow = new Date();
-        tomorrow.setDate(now.getDate() + 1);
+        tomorrow.setDate(new Date().getDate() + 1);
         tomorrow.setHours(9, 0, 0, 0);
 
-        dealy = setTimeout(() => {
-          UserManager.startStock()
+        this.delay = setTimeout(() => {
+          this.startStock();
         }, tomorrow - new Date());
-
       },
-
 
 
       //도박 코드
@@ -506,6 +637,85 @@ let {
           ].join('\n');
         }
       },
+
+
+
+      //숫자 야구
+      numberGame: {}, //게임 진행중인지 확인
+      numberGameNum: {}, //게임 진행중인 숫자
+      numberBaseballStart: function (id, number) {
+        let user = Find(id);
+        if (user === null) return `생성된 계정이 없어요.`;
+
+        if (numberGame[id] !== undefined) return [
+          `이미 진행중이에요.`,
+          `다시 시작하려면 "${Library.CommandPrefix} 숫자야구 종료"를 입력해주세요.`
+        ].join("\n");
+
+        while (numberGame[id].length !== Library.numberGameLength) {
+          let num = Math.floor(Math.random() * 9) + 1;
+          if (!numberGame[id].includes(num)) numberGame[id].push(num);
+        };
+        numberGameNum[id] = 0;
+        return [
+          `숫자야구를 시작할게요.`,
+          `진행하려면 "${Library.CommandPrefix} 확인 (숫자)"를 입력해주세요.`,
+          `숫자는 ${Library.numberGameLength}자리의 숫자로 이루어져야 하고, 1~9개의 숫자가 중복없이 이루어져 있어요.`
+        ].join("\n");
+      },
+
+      numberGameEnd: function (id) {
+        let user = Find(id);
+        if (user === null) return `생성된 계정이 없어요.`;
+
+        if (numberGame[id] === undefined) return [
+          `게임을 진행하고 있지 않아요.`,
+          `게임을 시작하려면 "${Library.CommandPrefix} 숫자야구 시작"을 입력해주세요.`
+        ].join("\n");
+        delete numberGame[id];
+        delete numberGameNum[id];
+        return `숫자야구를 종료했어요.`;
+      },
+
+      numberGameCheck: function (id, number) {
+        let user = Find(id);
+        if (user === null) return `생성된 계정이 없어요.`;
+
+        if (numberGame[id] === undefined) return [
+          `게임을 진행하고 있지 않아요.`,
+          `게임을 시작하려면 "${Library.CommandPrefix} 숫자야구 시작"을 입력해주세요.`
+        ].join("\n");
+        if (number.length !== Library.numberGameLength) return [
+          `게임 규칙을 다시 확인해주세요.`,
+          `숫자는 ${Library.numberGameLength}자리의 숫자로 이루어져야 하고, 1~9개의 숫자가 중복없이 이루어져 있어요.`
+        ]
+
+        let scroe = [0, 0, 0];
+        for (let i = 0; i <= Library.numberGameLength; i++) {
+          if (number[i] === this.numberGame[id][i]) scroe[0]++;
+          else if (this.numberGame[id].includes(number[i])) scroe[1]++;
+          else scroe[2]++;
+        }
+
+        this.numberGameNum[id]++;
+        if (score[0] === Library.numberGameLength) {
+          this.numberGame[id] = undefined;
+          this.numberGameNum[id] = 0;
+          return `게임이 종료되었어요.`;
+        }
+        return [
+          `결과는 [${score[0]}Strike ${score[1]}Ball ${score[2]}Out]이에요.`,
+          `${this.numberGameNum[id]}번째 시도에요.`
+        ].join("\n");
+      },
+
+
+      /**
+       * 
+       * @todo 
+       * 
+       * 
+       */
 
 
 

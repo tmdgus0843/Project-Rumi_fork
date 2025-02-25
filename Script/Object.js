@@ -17,11 +17,23 @@ let {
 
 (function () {
   function clsUser(user) {
+    /**
+     * 
+     * @description 가방에서 아이템을 찾는 함수
+     * @param {String} itemType 아이템 분류
+     * @param {String} itemName 아이템 이름
+     * @returns {Object} 아이템
+     */
     let FindInventory = function (itemType, itemName) {
       return user.inventory.find(i => i.type === itemType && i.name === itemName);
     };
 
     return {
+      /**
+       * 
+       * @description 유저 정보 반환
+       * @returns {Object} 유저 정보
+       */
       getJson: function () {
         return {
           name: user.name,
@@ -36,6 +48,11 @@ let {
         };
       },
 
+      /**
+       * 
+       * @description 유저의 코인 반환
+       * @returns {Number} 유저의 코인 반환
+       */
       getCoin: function () {
         return user.coin;
       },
@@ -48,6 +65,12 @@ let {
 
       addItem: function (itemType, itemName, count) { //가방에 물건 추가
         let item = FindInventory(itemType, itemName); //물건 검색
+        if (itemType === "lotto") {
+          user.inventory.push({ //로또 추가
+            type: itemType, //String
+            lottoNum: itemName, //Array
+          });
+        }
         if (item) { //가지고 있다면
           item.count += count; //수량 추가
         } else { //가지고 있지 않다면
@@ -76,17 +99,30 @@ let {
       isItem: function (itemType, itemName) { //물건 존재 여부 반환
         return Boolean(FindInventory(itemType, itemName));
       },
-      isItemCount: function (itemType, itemName, count) { //물건 수량 확인
+      isItemCount: function (itemType, itemName) { //물건 수량 확인
         return FindInventory(itemType, itemName).count;
       },
 
       useItem: function (itemType, itemName) {
         let item = FindInventory(itemType, itemName);
+        let DBItem = DataBase.getItem(index);
         if (item) {
+          switch (itemType) {
+            case "Ticket": 
+              switch (DBItem.func["type"]) {
+                case "betting":
+                  //추후 다시 구현
+                  break;
+              }
+              break;
+            case "Food":
+              break;
+            case "Membership":
+              break;
+          }
           user.inventory[itemType][itemName].count--;
           if (user.inventory[itemType][itemName].count <= 0) {
             delete user.inventory[itemType][itemName];
-            //다시 구현
           }
         }
       },

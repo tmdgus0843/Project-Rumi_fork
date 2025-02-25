@@ -71,20 +71,28 @@ let {
     }
 
     return {
+      /**
+       * 
+       * @param {String} id 사용자의 id
+       */
       Delete: function (id) {
         Delete(id);
       },
 
-      newRecord: function (id, name) {
-        CreateRecord(id, name);
+      /**
+       * 
+       * @param {String} id 사용자의 id
+       * @param {String} name 사용자의 이름
+       */
+      newRecord: function (id) {
+        CreateRecord(id);
       },
 
       /**
        * 
-       * @param {String} id user.id
-       * @param {String} type user or bot
-       * @param {String} action {user: `~을(를) 시도함.`, bot: `~을(를) ##함.`}
-       * @returns 
+       * @param {String} id 사용자의 id
+       * @param {String} type [user, bot]
+       * @param {String} action [`~을(를) 시도함.`, `~을(를) ##함.`]
        */
       Record: function (id, type, record) {
         let date = new Date();

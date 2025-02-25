@@ -25,54 +25,53 @@ let {
   DataBase
 } = require("DataBase");
 
-let getRandom = function (arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-let botCallCount = {};
+let botCallCount = {}; //봇 호출 횟수를 저장해요.
 
 let bot = BotManager.getCurrentBot();
 
-UserManager.startStock()
+UserManager.startStock();
 
 function onMessage(msg) {
-  let command = (commandText) => {
+  let command = (commandText) => { //메시지가 `접두사 + 명령어`인지 확인해요.
     return msg.content === `${Library.CommandPrefix} ${commandText}`;
   };
-  let commandSW = (commandText) => {
+  let commandSW = (commandText) => { //메시지가 `접두사 + 명령어`로 시작하는지 확인해요.
     return msg.content.startsWith(`${Library.CommandPrefix} ${commandText}`);
   };
 
+  //봇 메시지를 저장해요.
   let botMessage = Common.read(Library.DBFileList["Message"])["Message"];
 
-  if (command(`기본정보`)) {
+  if (command(`기본정보`)) { //기본정보를 출력해요.
     msg.reply([
       `방이름: ${msg.room}`,
       `사람이름: ${msg.author.name}`
     ].join("\n"));
   } else {
-    if (command(`도움말`)) msg.reply([
+    if (command(`도움말`)) msg.reply([ //도움말을 출력해요.
       `${msg.author.name}님! 아래 도움말을 참고해보세요!`,
       `https://www.team-cloud.kro.kr/manual`
     ].join("\n"));
     if (msg.room == Library.AdminRoom) {
-      if (commandSW(`eval`)) {
+      if (commandSW(`eval`)) { //eval을 실행해요.
         try {
           msg.reply(eval(msg.content.replace(`${Library.CommandPrefix} eval`, "")));
         } catch (e) {
           msg.reply([
-            getRandom(botMessage["Bug"]),
+            Common.RandomArray(botMessage["Bug"]),
             `[${e.name}: ${e.message}]`,
             `[${e.stack}]`
           ].join("\n"));
         }
       }
+      if (commandSW(`백업`)) return msg.reply(SystemManager.BackUp()); //백업을 실행해요.
     } else {
       try {
+        //UserCommand 함수를 실행해요.
         UserCommand(msg.room, msg.content, msg.author.name, msg.author.hash, msg.reply);
       } catch (e) {
         Common.logE([
-          getRandom(botMessage["Error"]),
+          Common.RandomArray(botMessage["Error"]),
           `room: ${msg.room}`,
           `sender: ${msg.author.name} (${msg.author.hash})`,
           `errorTitle: ${e.name}`,
@@ -80,7 +79,7 @@ function onMessage(msg) {
           `errorStack: ${e.stack}`
         ].join("\n"));
         msg.reply([
-          getRandom(botMessage["Bug"]),
+          Common.RandomArray(botMessage["Bug"]),
           `[${e.name}: ${e.message}]`,
           `[${e.stack}]`
         ].join("\n"));
@@ -92,19 +91,19 @@ bot.addListener(Event.MESSAGE, onMessage);
 
 
 function UserCommand(roomName, message, authorName, authorHash, reply) {
-  let command = (commandText) => {
+  let command = (commandText) => { //메시지가 `접두사 + 명령어`인지 확인해요.
     return message === `${Library.CommandPrefix} ${commandText}`;
   };
-  let commandSW = (commandText) => {
+  let commandSW = (commandText) => { //메시지가 `접두사 + 명령어`로 시작하는지 확인해요.
     return message.startsWith(`${Library.CommandPrefix} ${commandText}`);
   };
 
-  if (command(`등록`)) {
+  if (command(`등록`)) { //사용자를 등록해요.
     let userID = '';
     let list = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split(''); //배열로 변경
     do {
       for (let i = 0; i < 5; i++) {
-        userID += list.getRandom();
+        userID += Common.RandomArray(list);
       }
     } while ((UserManager.findUserById(userID) == null));
 
@@ -127,21 +126,23 @@ function UserCommand(roomName, message, authorName, authorHash, reply) {
 }
 
 
-function PlayCommand(room, message, authorName, authorHash, reply) {
+function PlayCommand(room, roomId, message, authorName, authorHash, reply) {
 
-  let command = (commandText) => {
+  let command = (commandText) => { //메시지가 `접두사 + 명령어`인지 확인해요.
     return message === `${Library.CommandPrefix} ${commandText}`;
   }
-  let commandSW = (commandText) => {
+  let commandSW = (commandText) => { //메시지가 `접두사 + 명령어`로 시작하는지 확인해요.
     return message.startsWith(`${Library.CommandPrefix} ${commandText}`);
   }
 
-  let splitMessage = message.split(" ");
+  //메시지를 띄어쓰기 단위로 나눠요.
+  let splitMessage = message.split(" "); 
 
+  //봇 메시지를 저장해요.
   let botMessage = Common.read(Library.FileList["Message"])["Message"];
 
-  let msgReply = function (type) {
-    let msg = botMessage["Normal"][type].getRandom();
+  let msgReply = function (type) { //봇 메시지에서 대입해요.
+    let msg = Common.RandomArray(botMessage["Normal"][type]);
     let replyStr;
     let replaceStr = {
       "\\bnickname\\b": authorName,
@@ -161,7 +162,7 @@ function PlayCommand(room, message, authorName, authorHash, reply) {
 
     return replyStr;
   }
-  let commands = {
+  let commands = { //봇 메시지에서 변환해요.
     "안녕": () => reply(msgReply("Hello")),
     "너": () => reply(msgReply("You")),
     "나": () => reply(msgReply("Me")),
@@ -254,12 +255,14 @@ function PlayCommand(room, message, authorName, authorHash, reply) {
       });
     },
   };
+  //메시지가 봇 메시지의 key값과 같다면 봇 메시지를 출력해요.
   if (message.startsWith(Library.CommandPrefix)) {
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     let command = message.replace(`${Library.CommandPrefix} `, "");
     if (commands[command]) {
       commands[command]();
       botCallCount++;
+      // 일정 횟수 이상 호출하면 특정 봇 메시지를 출력해요.
       if (botCallCount == 5) {
         msgReply("Hey").forEach(function (item) {
           let match = item.match(/(.*?)(\d+)$/);
@@ -286,13 +289,23 @@ function PlayCommand(room, message, authorName, authorHash, reply) {
     }
   }
 
+  
+  //마법의 루미님
+  if (message.startsWith(`마법의 루미님 `)) {
+    //마법의 루미님 메시지를 출력해요.
+    reply(Common.RandomArray(Common.read(Library.FileList["MagicAnswer"])));
+  }
 
-  if (command(`식사`)) {
+
+  //식사
+  if (command(`식사`)) { //식사해요.
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     reply(UserManager.eat(authorHash, message.seplice(`${Library.CommandPrefix} 식사 `, "")));
   }
 
-  if (command(`대출하기`)) {
+
+  //은행
+  if (command(`대출하기`)) { //대출 목록을 출력해요.
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     reply([
       `대출은 '루미야 대출 [대출명] [금액]'이라고 입력해주세요`,
@@ -301,23 +314,25 @@ function PlayCommand(room, message, authorName, authorHash, reply) {
     ].join("\n"));
     reply(UserManager.getLoanList(authorHash));
   }
-  if (commandSW(`대출`)) {
+  if (commandSW(`대출`)) { //대출을 신청해요.
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     let itemName = splitMessage[2];
     let count = splitMessage[3];
     if (itemName === undefined || count === undefined) return reply(`명령어를 제대로 입력해주세요.`);
     reply(UserManager.Loan(authorHash, "loan", itemName, ChangeNumber(count)));
   }
-  if (commandSW(`정산`)) {
+  if (commandSW(`정산`)) { //대출을 신청해요.
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     reply(UserManager.calcLoan(authorHash));
   }
-  if (commandSW(`해지`)) {
+  if (commandSW(`해지`)) { //대출을 해지해요.
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     reply(UserManager.cancelLoan(authorHash));
   }
 
-  if (command(`구매하기`)) {
+
+  //아이템
+  if (command(`구매하기`)) { //아이템 구매 목록을 출력해요.
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     reply([
       `구매를 하려면 '루미야 구매 [아이템명] [갯수]'이라고 입력해주세요.`,
@@ -326,49 +341,57 @@ function PlayCommand(room, message, authorName, authorHash, reply) {
     ].join("\n"));
     reply(UserManager.getSaleList(authorHash));
   }
-  if (commandSW(`구매`)) {
+  if (commandSW(`구매`)) { //아이템을 구매해요.
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     let itemName = splitMessage[2];
     let count = splitMessage[3];
     if (itemName === undefined || count === undefined) return reply(`명령어를 제대로 입력해주세요.`);
     reply(UserManager.Purchase(authorHash, itemName, ChangeNumber(count)));
   }
-
-  if (command(`판매하기`)) {
-    if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
-    reply([
-      `구매를 하려면 '루미야 판매 [아이템명] [갯수]'이라고 입력해주세요.`,
-      `예시를 보여 줄게요. ex) 루미야 판매 쿠키 3`,
-      `위 명령어는 쿠키를 3개를 판매한다는 의미에요.`
-    ].join("\n"));
-    reply([
-      `판매 가능한 아이템이에요!`,
-      `${UserManager.OpenBag(authorHash)}`
-    ].join("\n"));
-  }
-  if (commandSW(`판매`)) {
+  if (command(`사용`)) { //아이템을 사용해요.
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     let itemName = splitMessage[2];
-    let count = splitMessage[3];
-    if (itemName === undefined || count === undefined) return reply(`명령어를 제대로 입력해주세요.`);
-    reply(UserManager.Purchase(authorHash, itemName, ChangeNumber(count)));
-  }
-
-
-  if (command(`사용`)) {
-    if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
-    reply([
+    if (itemName === undefined) return reply([
       `사용을 하려면 '루미야 사용 [품목번호]'이라고 입력해주세요.`,
       `예시를 보여 줄게요. ex) 루미야 사용 3`,
-      `위 명령어는 3번 품목(ai 5회 이용권)를 사용한다는 의미에요.`
+      `위 명령어는 3번 품목(ai 5회 이용권)을 1회(1장) 사용한다는 의미에요.`
     ].join("\n"));
-    let itemName = splitMessage[2];
-    if (itemName === undefined) return reply(`명령어를 제대로 입력해주세요.`);
     reply(UserManager.UseItem(authorHash, itemName));
   }
 
 
-  if (commandSW(`베팅`)) {
+  //음악
+  if (commandSW(`음악`)) {
+    if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
+    if (splitMessage[2] === "순위") { //음악 순위를 출력해요.
+      reply(UserManager.getMusicChart(authorHash, 50));
+    }
+    if (splitMessage[2] === "검색") { //음악을 검색해요.
+      let musicName = message.replace(`${Library.CommandPrefix} 음악 검색 `, "");
+      if (musicName === undefined) return reply(`명령어를 제대로 입력해주세요.`);
+      if (Common.read(Library.FolderList["MusicAlbumFolder"] + `${musicName}.jpg`) === null) 
+        SystemManager.getFileDownload(UserManager.getMusicSearch(authorHash, musicName)[1], Library.FolderList["MusicAlbumFolder"], `${musicName}.jpg`);
+      SystemManager.sendImage(roomId, Library.rootPath + Library.FolderList["MusicAlbumFolder"] + `${musicName}.jpg`);
+      reply(UserManager.getMusicSearch(authorHash, musicName)[0]);
+    }
+    if (splitMessage[2] === "추천") { //음악을 추천해요.
+      reply(UserManager.getRandomMusic(authorHash));
+    }
+  }
+
+
+  //송금
+  if (commandSW(`송금`)) { //돈을 송금해요.
+    if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
+    let target = splitMessage[2];
+    let count = splitMessage[3];
+    if (target === undefined || count === undefined) return reply(`명령어를 제대로 입력해주세요.`);
+    reply(UserManager.Remittance(authorHash, target, ChangeNumber(count)));
+  }
+
+
+  //베팅
+  if (commandSW(`베팅`)) { //돈을 베팅해요.
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     let itemName = splitMessage[2];
     let count = splitMessage[3];
@@ -376,23 +399,51 @@ function PlayCommand(room, message, authorName, authorHash, reply) {
     reply(UserManager.Betting(authorHash, itemName, ChangeNumber(count)));
   }
 
-  if (commandSW(`주식`)){
+
+  //출석
+  if (commandSW(`주식`)) {
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     let type = splitMessage[2];
     let name = splitMessage[3];
     let count = splitMessage[4];
-    if (!["현황","구매","판매"].includes(type) || name === undefined || isNaN(Number(count))) return reply(`명령어를 제대로 입력해주세요.`)
-    if (type == "현황") return reply(Object.entries(UserManager.getStockList()).map(([key,value]) => (key + " : " + value)).join("\n"))
-    if (type == "구매") return reply(UserManager.buyStock(authorHash, name, Number(count)))
-    if (type == "판매") return reply(UserManager.sellStock(authorHash, name, Number(count)))
+    if (!["현황", "구매", "판매"].includes(type) || name === undefined || isNaN(count)) return reply(`명령어를 제대로 입력해주세요.`);
+    switch (type) {
+      case "현황": //주식 현황을 출력해요.
+        let stock = Object.entries(UserManager.getStockList());
+        reply(stock.map(([key, value]) => `${key} : ${value}`).join("\n"));
+        /* 다시 제작
+        let time = new Date().getTime();
+        stock.map(([key, value]) => {
+          let date = []
+          for (let i = new Date().getDate() - 4; i < new Date().getDate(); i++) {
+            date.push(`${i}일`);
+          }
+          let graph = SystemManager.getGraph(date, [{
+            label: key,
+            data: value
+          }]);
+          if (Common.read(Library.FolderList["StockFolder"] + `${time}.jpg`) === null) 
+            SystemManager.getFileDownload(graph, Library.FolderList["StockFolder"], `${time}.jpg`);
+        })
+        SystemManager.sendImage(roomId, Library.rootPath + Library.FolderList["StockFolder"] + `${time}.jpg`);
+        */
+        break;
+      case "구매": //주식을 구매해요.
+        reply(UserManager.buyStock(authorHash, name, ChangeNumber(count)));
+        break;
+      case "판매": //주식을 판매해요.
+        reply(UserManager.sellStock(authorHash, name, ChangeNumber(count)));
+        break;
+    }
   }
 
 
-  if (command(`출석`)) {
+  //출석
+  if (command(`출석`)) { //출석을 체크해요.
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     reply(UserManager.checkAtten(authorHash));
   }
-  if (command(`출석 순위`)) {
+  if (command(`출석 순위`)) { //출석 순위를 출력해요.
     if (!UserManager.contain) return reply(`생성된 계정이 없어요.`);
     let rank = Object.keys(data["list"][room]).map(u =>
       `${Object.keys(data["list"][room]).indexOf(u) + 1}위ㅣ${UserManager.findUser(data["list"][room][u]).name}(${data["list"][room][u]})`
@@ -405,7 +456,36 @@ function PlayCommand(room, message, authorName, authorHash, reply) {
   }
 
 
-  if (command(`우편`)) {
+  //로또
+  if (command(`로또`)) { //복권을 구매해요.
+    if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
+    reply(UserManager.buyLotto(authorHash));
+  }
+  if (commandSW(`로또 기록`)) {
+    if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
+    reply(UserManager.getLottoRecord(authorHash, splitMessage[3]));
+  }
+
+
+  if (commandSW(`숫자야구`)) {
+    if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
+    let number = splitMessage[3];
+    switch (splitMessage[2]) {
+      case "시작":
+        reply(UserManager.numberGameStart(authorHash));
+        break;
+      case "확인": 
+        reply(UserManager.numberGameCheck(authorHash, number));
+        break;
+      case "종료":
+        reply(UserManager.numberGameEnd(authorHash, number));
+        break;
+    }
+  }
+
+
+  //우편
+  if (command(`우편`)) { //우편을 확인해요.
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     let PostList = SystemManager.getPostList(authorHash);
 
@@ -424,8 +504,7 @@ function PlayCommand(room, message, authorName, authorHash, reply) {
       ].join("\n"));
     }
   }
-
-  if (commandSW(`우편 받기`)) {
+  if (commandSW(`우편 받기`)) { //우편을 받아요.
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     let PostList = SystemManager.getPostList(authorHash);
     let postIndex = splitMessage[3];
@@ -436,8 +515,7 @@ function PlayCommand(room, message, authorName, authorHash, reply) {
     reply(UserManager.RecivePost(authorHash, PostList[postIndex].itemList, PostList[postIndex].coin));
     SystemManager.removePost(postIndex);
   }
-
-  if (commandSW(`우편 모두받기`)) {
+  if (commandSW(`우편 모두받기`)) { //우편을 모두 받아요.
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     let PostList = SystemManager.getPostList(authorHash);
 
@@ -445,9 +523,41 @@ function PlayCommand(room, message, authorName, authorHash, reply) {
     SystemManager.removePostAll(authorHash);
   }
 
-  if (command(`스타랭크`)) {
+
+  //스타랭크
+  if (command(`스타랭크`)) { //돈 순위를 출력해요.
     if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
     reply(UserManager.RankingInfo(authorHash));
+  }
+
+
+
+
+
+  /* ──────── [ Admin Command ] ──────── */
+  //로또 추첨
+  if (commandSW(`로또 추첨`)) {
+    if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
+    if (!UserManager.findUser(authorHash).admin) return reply(`어라? ${authorName}님은 관리자가 아니에요.`);
+    reply(UserManager.lottoCheck(authorHash, splitMessage[3]));
+  }
+
+
+  //스타 지급/회수
+  if (commandSW(`스타`)) {
+    if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
+    if (!UserManager.findUser(authorHash).admin) return reply(`어라? ${authorName}님은 관리자가 아니에요.`);
+    let target = splitMessage[2];
+    let count = splitMessage[3];
+    if (target === undefined || count === undefined) return reply(`명령어를 제대로 입력해주세요.`);
+    if (count < 0) {
+      UserManager.RecivePost(target, undefined, Number(count));
+      reply(`${target}님에게 ${count}스타를 회수했어요.`);
+      
+    } else if (count > 0) {
+      UserManager.RecivePost(target, undefined, Number(count));
+      reply(`${target}님에게 ${count}스타를 지급했어요.`);
+    }
   }
 
 }
@@ -458,9 +568,12 @@ function checkNumberic(num) {
 }
 
 function ChangeNumber(num) {
+  //숫자로 변환
   return (checkNumberic(num) ? Math.floor(Number(num)) : 1);
 }
 
-function onStartCompile(){
-  UserManager.endStock()
+
+
+function onStartCompile() {
+  UserManager.endStock();
 }

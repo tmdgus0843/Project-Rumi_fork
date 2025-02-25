@@ -14,9 +14,20 @@ let threadQueue = []; //스레드 큐
 (function () {
   function Common() {
     return {
+      /**
+       * 
+       * @param {String} path 파일 경로
+       * @returns sdcard/TeamCloud/Project-Rumi/ + path
+       */
       file: function (path) { //파일 경로를 반환합니다.
         return Library.rootPath + path;
       },
+
+      /**
+       * 
+       * @param {String} path 파일 경로
+       * @returns {Object} 파일을 읽어 반환합니다.
+       */
       read: function (path) { //파일을 읽어 반환합니다.
         try {
           return JSON.parse(FileStream.read(this.file(path)));
@@ -24,6 +35,12 @@ let threadQueue = []; //스레드 큐
           this.logE("read()", e);
         }
       },
+
+      /**
+       * 
+       * @param {String} path 파일 경로
+       * @param {Object} obj 파일에 작성할 데이터
+       */
       write: function (path, obj) { //파일에 데이터를 작성합니다.
         try {
           FileStream.write(this.file(path), JSON.stringify(obj));
@@ -31,6 +48,11 @@ let threadQueue = []; //스레드 큐
           this.logE("write()", e)
         }
       },
+
+      /**
+       * 
+       * @param {String} path 파일 경로
+       */
       remove: function (path) { //파일을 삭제합니다.
         try {
           FileStream.remove(this.file(path));
@@ -39,11 +61,21 @@ let threadQueue = []; //스레드 큐
         }
       },
 
+
+      /**
+       * 
+       * @param {Number} start 시작값
+       * @param {Number} end 종료값
+       * @returns {Number} start ~ end 사이의 랜덤값
+       */
       Random: function (start, end) { //랜덤값을 반환합니다.
         return (start + (Math.random() * (end - start)))
       },
       RandomFloat: function (start, end) { //랜덤 실수값을 반환합니다.
         return (start + Math.floor(Math.random() * (end - start + 1)));
+      },
+      RandomArray: function (arr) { //랜덤 배열값을 반환합니다.
+        return arr[Math.floor(Math.random() * arr.length)];
       },
 
       logI: function (funcName, data) { //정보 로그를 출력합니다.

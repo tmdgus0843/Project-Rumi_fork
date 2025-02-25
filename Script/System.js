@@ -71,14 +71,45 @@ function onMessage(msg) {
       `전달 실패 채팅방: ${f}개`
     ].join("\n"));
   }
+
+
+  let release = SystemManager.getRelease()[0];
+  let updateList = Common.read(Library.FileList.UpdateList);
+  if (Object.keys(updateList).includes(release.release_id)) return;
+  if (release.id === 200) {
+    updateList[release.release_id] = {
+      "tag_name": release.tag_name,
+      "body": release.body,
+      "download": release.download
+    };
+    Common.write(Library.FileList.UpdateList, updateList);
+
+    bot.send(Library.AdminRoom, [
+      `새로운 릴리즈를 확인했어요!`,
+      `코드 버전: ${release.tag_name}`,
+      `업데이트 내용: ${release.body}`
+    ].join("\n"));
+    java.lang.Thread.sleep(500);
+    bot.send(Library.AdminRoom, `봇 업데이트를 시작할게요.`);
+    SystemManager.getFileDownload(release.download, `sdcard/TeamCloud/Project-Rumi/zips/`); //fileName === undefined
+    java.lang.Thread.sleep(10000);
+    unZip(java.io.File(`sdcard/TeamCloud/Project-Rumi/zips/`).list()[0], `sdcard/TeamCloud/Project-Rumi/codes/`);
+    FileMove(java.io.File(`sdcard/TeamCloud/Project-Rumi/codes/`).list(), release.tag_name);
+    bot.send(Library.AdminRoom, `봇 업데이트를 완료했어요.`);
+  }
 }
 bot.addListener(Event.MESSAGE, onMessage);
+
+let intervalBackup = setInterval(() => {
+  SystemManager.BackUp();
+}, Library.BackupTime);
 
 
 function startComplie() {
   let success = true;
   try {
     BotManager.compileAll();
+    clearInterval(intervalBackup);
   } catch (e) {
     bot.send(Library.AdminRoom, `컴파일 중 오류가 발생했어요.\n${e}`);
     success = false;
