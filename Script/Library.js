@@ -35,7 +35,7 @@
       }
     }
     return {
-      More: "\n200b".repeat(500), //더 보기 변수
+      More: "\u200b".repeat(500), //더 보기 변수
       /**
        * 
        * @param {String} type ms를 변환할 단위 [h, m, s]
@@ -69,12 +69,16 @@
         SetList: "Data/ETCs/SetList.json",
         UpdateList: "Data/ETCs/UpdateList.json",
         MagicAnswerList: "Data/ETCs/MagicAnswerList.json",
+
+        KeyList: "Data/ETCs/KeyList.json",
       },
 
       FolderList: {
         RecordFolder: "Records/",
         BackupFolder: "Backup/",
         MusicAlbumFolder: "Data/ETCs/MusicAlbum/",
+
+        ChatFolder: "Data/Chats/",
       },
 
       DBFileList: {

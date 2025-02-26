@@ -712,12 +712,86 @@ let {
 
       /**
        * 
-       * @todo 
-       * 
-       * 
+       * @description 이미지 가져오기
+       * @param {String} id 사용자 아이디
+       * @param {String} room 방이름
+       * @returns {Object} 이미지 정보 객체
        */
+      getImage: function (id, room) {
+        let user = Find(id);
+        if (user === null) return `생성된 계정이 없어요.`;
 
+        let imageObj = Common.read(`${Library.FolderList["ChatFolder"]}/${room}.json`)[id]; //{image}
+        switch(imageObj.code) {
+          case 200:
+            return imageObj.image; //{code, url, mimeType}
+          case 400:
+            return "답장을 사용해주세요.";
+          case 404:
+            return "이미지를 가져올 수 없어요.";
+          default:
+            return "이미지를 가져올 수 없어요.";
+        }
+      },
 
+      /**
+       * 
+       * @description 이미지 분석
+       * @param {String} id 사용자 아이디
+       * @param {Object} image 이미지 정보
+       * @param {String} image.url 이미지 URL
+       * @param {String} image.mimeType 이미지 MIME 타입
+       * @param {String} addPrompt 추가 질문
+       * @returns {String} 이미지 분석 결과
+       */
+      imageAnalyze: function (id, image, addPrompt) {
+        let user = Find(id);
+        if (user === null) return `생성된 계정이 없어요.`;
+
+        let imageToBase64 = org.jsoup.Jsoup.connect(`https://itob.kro.kr/encord?url=${image.url}`).ignoreHttpErrors(true).get();
+
+        let prompt = "해당 이미지를 설명 또는 분석하시오. 다른 말은 하지마시오.";
+        prompt = addPrompt ? addPrompt + "\n" + prompt : prompt;
+        let requestBody = {
+          contents: [{
+            role: "user",
+            parts: [{
+              text: ""
+            }]
+          }],
+          tools: [{
+            google_search: {}
+          }],
+          generationConfig: {
+            response_modalities: ["TEXT"]
+          },
+          systemInstruction: {
+            role: "user",
+            parts: [{
+              text: prompt
+            }]
+          }
+        };
+
+        if (image.mimeType) {
+          requestBody.contents[0].parts.push({
+            image: {
+              mimeType: image.mimeType,
+              data: imageToBase64
+            }
+          });
+        }
+
+        let analyze = JSON.parse(org.jsoup.Jsoup.connect(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${Common.read(Library.FileList["KeyList"]).GoogleAPIKey}`)
+          .ignoreContentType(true)
+          .header("Content-Type", "application/json")
+          .requestBody(JSON.stringify(requestBody))
+          .post()
+          .body());
+        if (jsonResponse.candidates[0].content.parts.length <= 0) return "제미나이 API 응답 오류: 응답 구조가 예상과 다릅니다.";
+
+        return jsonResponse.candidates[0].content.parts[0].text;
+      },
 
 
       findUser: function (id) {
