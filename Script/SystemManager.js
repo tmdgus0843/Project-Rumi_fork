@@ -245,51 +245,6 @@ let BackupList = Library.FileList;
     }
 
 
-    /**
-     * 
-     * @description 그래프 생성
-     * @param {Array} labels ["1일", "2일", "3일", "4일"]
-     * @param {Object} data [{label: "first", data: [23, 56,12, 95]}]
-     * @param {String} title 그래프 제목
-     * @returns 
-     */
-    let graph = function (labels, data, title) {
-      let datasets = [];
-      for (let i = 0; i < data.length; i++) {
-        datasets.push({
-          "label": data[i].label,
-          "backgroundColor": "rgb(255, 255, 255)",
-          "borderColor": "rgb(255, 255, 255)",
-          "fill": false,
-          "data": data[i].data
-        });
-      }
-      return JSON.parse(org.jsoup.Jsoup.connect("https://quickchart.io/chart/create")
-        .header("Content-Type", "application/json")
-        .requestBody(JSON.stringify({
-          "chart": {
-            "type": "line",
-            "data": [{
-              "labels": labels, //day
-              "datasets": datasets,
-            }],
-            "options": {
-              "title": {
-                "display": true,
-                "text": title,
-              },
-              "plugins": {
-                "backgroundImageUrl": "https://res.cloudinary.com/teamcloud/image/upload/v1740378340/v8vdboe9mzepol5d3mg5.png" //흰색 배경
-              }
-            }
-          }
-        }))
-        .ignoreContentType(true)
-        .ignoreHttpErrors(true)
-        .post()
-        .text())["url"];
-    }
-
 
     return {
       getPostList: function (id) {
@@ -363,11 +318,6 @@ let BackupList = Library.FileList;
 
       sendImage: function (channelId, path) {
         return sendImage(channelId, path);
-      },
-
-
-      getGraph: function (labels, data, title) {
-        return graph(labels, data, title);
       }
     }
   }

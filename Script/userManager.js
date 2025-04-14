@@ -83,22 +83,26 @@ let {
     }
 
     let CreateUser = function (name, profileId) {
+       //랜덤 아이디 생성
+      let id = function () {
+        let id = "";
+        for (let i = 0; i < 10; i++) {
+          id += Common.RandomArray(["0", "1", "2", "3", "4", "5", ",6", "7", "8", "9"]);
+        }
+        return id;
+      }
       let obj = {
         name: name,
-        id: Array.from({
-          length: 6
-        }, () => ["1", "2", "3", "4", "5", ",6", "7", "8", "9"][Math.floor(Math.random() * 35)]).join(""), //랜덤 아이디 생성
+        id: id(),
         profileId: profileId,
         signUpDate: [new Date().getFullYear(), new Date().getMonth(), new Date().getDay()],
         admin: false,
         ban: false,
         warn: 0,
         coin: 10000,
-        mount: {
-          food: 0,
-          mandrel: 0
-        },
+        hungry: 0,
         chatCount: 0,
+        favorability: 0,
         stock: Object.fromEntries(Object.entries(this.getStockList()).map(([key]) => [key, 0])),
         etc: {}
       };
@@ -282,6 +286,7 @@ let {
       UseItem: function (id, index) {
         let user = Find(id);
         if (user === null) return `생성된 계정이 없어요.`;
+
         let DBItem = DataBase.getItem(index);
         if (DBItem === null) return `존재하지 않는 아이템이에요.`;
         if (user.isItemCount(DBItem.type, DBItem.name, 1)) {
@@ -298,7 +303,7 @@ let {
               itemType = "멤버쉽";
               break;
           }
-          user.useItem(DBItem.type, DBItem.name);
+          result = user.useItem(DBItem.type, DBItem.name);
           Save();
           return [
             `${DBItem.name}을(를) 사용했어요.`,
@@ -493,6 +498,7 @@ let {
           `${calcCoin}스타를 갚았어요.`
         ].join('\n');
       },
+      //송금
       Remittance: function (id, target, coin) {
         let user = Find(id);
         if (user === null) return `생성된 계정이 없어요.`;
@@ -606,6 +612,7 @@ let {
         if (Number(coin) > user.coin) return "소지하고 있는 재화가 부족해요.";
         if (target === "흑" || target === "백") { //글자
           random = Common.Random(0, 1) === 0 ? "흑" : "백";
+          if ()
           if (random === target) {
             rate *= 2;
             winFlag = true;
@@ -712,6 +719,53 @@ let {
 
       /**
        * 
+       * @description 그래프 생성
+       * @param {Array} labels ["1일", "2일", "3일", "4일"]
+       * @param {Object} data [{label: "first", data: [23, 56,12, 95]}]
+       * @param {String} title 그래프 제목
+       * @returns 
+       */
+      graph: function (labels, data, title) {
+        let datasets = [];
+        for (let i = 0; i < data.length; i++) {
+          datasets.push({
+            "label": data[i].label,
+            "backgroundColor": "rgb(255, 255, 255)",
+            "borderColor": "rgb(255, 255, 255)",
+            "fill": false,
+            "data": data[i].data
+          });
+        }
+        return JSON.parse(org.jsoup.Jsoup.connect("https://quickchart.io/chart/create")
+          .header("Content-Type", "application/json")
+          .requestBody(JSON.stringify({
+            "chart": {
+              "type": "line",
+              "data": [{
+                "labels": labels, //day
+                "datasets": datasets,
+              }],
+              "options": {
+                "title": {
+                  "display": true,
+                  "text": title,
+                },
+                "plugins": {
+                  "backgroundImageUrl": "https://res.cloudinary.com/teamcloud/image/upload/v1740378340/v8vdboe9mzepol5d3mg5.png" //흰색 배경
+                }
+              }
+            }
+          }))
+          .ignoreContentType(true)
+          .ignoreHttpErrors(true)
+          .post()
+          .text())["url"];
+      },
+
+
+
+      /**
+       * 
        * @description 이미지 가져오기
        * @param {String} id 사용자 아이디
        * @param {String} room 방이름
@@ -721,10 +775,10 @@ let {
         let user = Find(id);
         if (user === null) return `생성된 계정이 없어요.`;
 
-        let imageObj = Common.read(`${Library.FolderList["ChatFolder"]}/${room}.json`)[id]; //{image}
-        switch(imageObj.code) {
+        let imageObj = Common.read(`${Library.FolderList["ChatFolder"]}${room}.json`)[id]; //{image}
+        switch (imageObj.code) {
           case 200:
-            return imageObj.image; //{code, url, mimeType}
+            return imageObj.image; //{url, mimeType}
           case 400:
             return "답장을 사용해주세요.";
           case 404:
@@ -782,15 +836,15 @@ let {
           });
         }
 
-        let analyze = JSON.parse(org.jsoup.Jsoup.connect(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${Common.read(Library.FileList["KeyList"]).GoogleAPIKey}`)
+        let analyze = JSON.parse(org.jsoup.Jsoup.connect(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${Common.read(Library.FileList["KeyList"]).GeminiAPIKey}`)
           .ignoreContentType(true)
           .header("Content-Type", "application/json")
           .requestBody(JSON.stringify(requestBody))
           .post()
           .body());
-        if (jsonResponse.candidates[0].content.parts.length <= 0) return "제미나이 API 응답 오류: 응답 구조가 예상과 다릅니다.";
+        if (analyze.candidates[0].content.parts.length <= 0) return "제미나이 API 응답 오류: 응답 구조가 예상과 다릅니다.";
 
-        return jsonResponse.candidates[0].content.parts[0].text;
+        return analyze.candidates[0].content.parts[0].text;
       },
 
 

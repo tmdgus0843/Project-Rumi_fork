@@ -136,7 +136,7 @@ function PlayCommand(room, roomId, message, authorName, authorHash, reply) {
   }
 
   //메시지를 띄어쓰기 단위로 나눠요.
-  let splitMessage = message.split(" "); 
+  let splitMessage = message.split(" ");
 
   //봇 메시지를 저장해요.
   let botMessage = Common.read(Library.FileList["Message"])["Message"];
@@ -151,7 +151,7 @@ function PlayCommand(room, roomId, message, authorName, authorHash, reply) {
       "\\bD\\b": new Date().getDate(),
       "\\bh\\b": new Date().getHours(),
       "\\bm\\b": new Date().getMinutes(),
-      "\\bLike\\b": UserManager.findUser(authorHash).like
+      "\\bLike\\b": UserManager.findUser(authorHash).favorability,
     };
     for (let key in replaceStr) {
       if (replaceStr.hasOwnProperty(key)) {
@@ -261,6 +261,12 @@ function PlayCommand(room, roomId, message, authorName, authorHash, reply) {
     let command = message.replace(`${Library.CommandPrefix} `, "");
     if (commands[command]) {
       commands[command]();
+      if (Common.Random(0, 3) > 1) {
+        if (UserManager.findUser(authorHash).favorability < -999 || UserManager.findUser(authorHash).favorability > 999) return;
+        let heart = Common.Random(1, 3);
+        UserManager.findUser(authorHash).favorability += heart;
+        reply(`🩷+${heart}`); //🩷 = 핑크 하트 이모티콘
+      }
       botCallCount++;
       // 일정 횟수 이상 호출하면 특정 봇 메시지를 출력해요.
       if (botCallCount == 5) {
@@ -269,7 +275,8 @@ function PlayCommand(room, roomId, message, authorName, authorHash, reply) {
           if (match) {
             let str = match[1].trim();
             let num = Number(match[2]);
-            UserManager.findUser(authorHash).coin -= num;
+            if (UserManager.findUser(authorHash).favorability < -999) return;
+            UserManager.findUser(authorHash).favorability -= num;
             reply(str);
           }
         });
@@ -280,7 +287,7 @@ function PlayCommand(room, roomId, message, authorName, authorHash, reply) {
           if (match) {
             let str = match[1].trim();
             let num = Number(match[2]);
-            UserManager.findUser(authorHash).coin -= num;
+            UserManager.findUser(authorHash).favorability -= num;
             reply(str);
           }
         });
@@ -289,7 +296,7 @@ function PlayCommand(room, roomId, message, authorName, authorHash, reply) {
     }
   }
 
-  
+
   //마법의 루미님
   if (message.startsWith(`마법의 루미님 `)) {
     //마법의 루미님 메시지를 출력해요.
@@ -369,7 +376,7 @@ function PlayCommand(room, roomId, message, authorName, authorHash, reply) {
     if (splitMessage[2] === "검색") { //음악을 검색해요.
       let musicName = message.replace(`${Library.CommandPrefix} 음악 검색 `, "");
       if (musicName === undefined) return reply(`명령어를 제대로 입력해주세요.`);
-      if (Common.read(Library.FolderList["MusicAlbumFolder"] + `${musicName}.jpg`) === null) 
+      if (Common.read(Library.FolderList["MusicAlbumFolder"] + `${musicName}.jpg`) === null)
         SystemManager.getFileDownload(UserManager.getMusicSearch(authorHash, musicName)[1], Library.FolderList["MusicAlbumFolder"], `${musicName}.jpg`);
       SystemManager.sendImage(roomId, Library.rootPath + Library.FolderList["MusicAlbumFolder"] + `${musicName}.jpg`);
       reply(UserManager.getMusicSearch(authorHash, musicName)[0]);
@@ -474,7 +481,7 @@ function PlayCommand(room, roomId, message, authorName, authorHash, reply) {
       case "시작":
         reply(UserManager.numberGameStart(authorHash));
         break;
-      case "확인": 
+      case "확인":
         reply(UserManager.numberGameCheck(authorHash, number));
         break;
       case "종료":
@@ -531,6 +538,15 @@ function PlayCommand(room, roomId, message, authorName, authorHash, reply) {
   }
 
 
+  //이미지 분석
+  if (commandSW(`분석`)) {
+    if (!UserManager.contain(authorHash)) return reply(`생성된 계정이 없어요.`);
+    let prompt = message.replace(`${Library.CommandPrefix} 분석`, "");
+    if (SystemManager.getMessage(room)[authorHash].reply == false) return reply(``);
+    reply(UserManager.ImageAnalysis(authorHash, url));
+
+  }
+
 
 
 
@@ -553,7 +569,7 @@ function PlayCommand(room, roomId, message, authorName, authorHash, reply) {
     if (count < 0) {
       UserManager.RecivePost(target, undefined, Number(count));
       reply(`${target}님에게 ${count}스타를 회수했어요.`);
-      
+
     } else if (count > 0) {
       UserManager.RecivePost(target, undefined, Number(count));
       reply(`${target}님에게 ${count}스타를 지급했어요.`);

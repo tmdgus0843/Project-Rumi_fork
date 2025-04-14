@@ -21,6 +21,12 @@
 // (bigint) msg.channelId: 각 방의 고유 id
 /////////////////
 
+/**
+ * = [ DevLog ] =
+ * === [ release 0.0.1 ] ===
+ * 1차 검토 완료
+ */
+
 
 (function () {
   function Library() {
@@ -51,14 +57,14 @@
 
       DumpTimeout: Time("m", 5), //덤프 타임아웃
 
-      BettingLimit: 99999000, //배팅 제한
-      MaxRemittance: 999900, //송금 제한
-      MaxLoan: 999900, //대출 제한
-      BackupTime: Time("m", 20), //백업 주기
-      FavorabilityMaxCount: 999, //호감도 최대치
-      BankTime: [7, 22], //은행 시간
-      numberGameLength: 5, //숫자 게임 길이
-      numberGameLimit: 10, //숫자 게임 제한
+      BettingLimit: 99999000, //배팅 제한                           //적용됨
+      MaxRemittance: 999900, //송금 제한                            //적용됨
+      MaxLoan: 999900, //대출 제한                                  //적용됨
+      BackupTime: Time("m", 20), //백업 주기                        //적용됨
+      FavorabilityMaxCount: [-999, 999], //호감도 최대치            //적용됨
+      BankTime: [7, 22], //은행 시간                                //적용됨
+      numberGameLength: 5, //숫자 게임 길이                         //적용됨
+      numberGameLimit: 10, //숫자 게임 제한                         //적용됨
 
       rootPath: "sdcard/TeamCloud/Project-Rumi/", //루트 경로
       FileList: { //파일 리스트
@@ -78,7 +84,9 @@
         BackupFolder: "Backup/",
         MusicAlbumFolder: "Data/ETCs/MusicAlbum/",
 
-        ChatFolder: "Data/Chats/",
+        MessageFolder: "Messages/",
+        RoomFolder: "Rooms/",
+        AuthorFolder: "Authors/",
       },
 
       DBFileList: {

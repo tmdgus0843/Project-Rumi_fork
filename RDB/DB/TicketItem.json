@@ -1,47 +1,56 @@
 [{
     "index": 1,
     "itemName": "응원봉",
-    "description": "시루의 도박 게임에서 일정 확률로 배팅한 금액보다 2배 높은 금액을 받을 수 있습니다.",
+    "description": "시루의 도박 게임에서 일정 확률로 배팅한 금액보다 1.5배 높은 금액을 받을 수 있습니다.",
     "price": 5000,
-    "upItem": "별응원봉"
+    "upItem": 2,
+    "func": {
+      "type": "betting",
+      "value": "1.5"
+    }
   },
   {
     "index": 2,
     "itemName": "별응원봉",
-    "description": "시루의 도박 게임에서 무조건 배팅한 금액보다 2배 높은 금액을 받을 수 있습니다.",
+    "description": "시루의 도박 게임에서 무조건 배팅한 금액보다 3배 높은 금액을 받을 수 있습니다.",
     "price": 10000,
-    "upItem": ""
+    "upItem": 0,
+    "func": {
+      "type": "betting",
+      "value": "3"
+    }
   },
   {
-    "index": 3,
-    "itemName": "사용자 지정 명령어 추가(+1개)",
-    "description": "사용자가 원하는 명령어를 1개 추가할 수 있습니다.",
-    "price": 10000,
-    "upItem": "사용자 지정 명령어 추가(+5개)"
-  },
-  {
-    "index": 4,
-    "itemName": "사용자 지정 명령어 추가(+5개)",
-    "description": "사용자가 원하는 명령어를 5개 추가할 수 있습니다.",
-    "price": 50000,
-    "upItem": ""
-  }, {
     "index": 5,
     "itemName": "AI 사용권(+5회)",
-    "description": "생성형 AI인 ChatGPT 4를 5회 사용하실 수 있습니다.",
+    "description": "생성형 AI인 Gemini의 사용횟수를 5회 추가하실 수 있습니다.",
     "price": 5000,
-    "upItem": ""
-  }, {
+    "upItem": 0,
+    "func": {
+      "type": "ai",
+      "value": "+5"
+    }
+  },
+  {
     "index": 6,
-    "itemName": "하급 랜덤 음식 지급권(+3개)",
+    "itemName": "하급 랜덤 음식 지급권",
     "description": "3000스타 이하의 음식을 랜덤으로 지급합니다.",
     "price": 2500,
-    "upItem": ""
-  }, {
+    "upItem": 7,
+    "func": {
+      "type": "food",
+      "value": "pre_3000"
+    }
+  },
+  {
     "index": 7,
-    "itemName": "상급 랜덤 음식 지급권(+5개)",
+    "itemName": "상급 랜덤 음식 지급권",
     "description": "5000스타 이하의 음식을 랜덤으로 지급합니다.",
     "price": 4000,
-    "upItem": ""
+    "upItem": 0,
+    "func": {
+      "type": "food",
+      "value": "pre_5000"
+    }
   }
 ]

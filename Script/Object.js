@@ -107,11 +107,19 @@ let {
         let item = FindInventory(itemType, itemName);
         let DBItem = DataBase.getItem(index);
         if (item) {
+          let SetList = Common.read(Library.FileList["SetList"]);
           switch (itemType) {
-            case "Ticket": 
+            case "Ticket":
               switch (DBItem.func["type"]) {
                 case "betting":
-                  //추후 다시 구현
+                  if (DBItem.func["value"].includes("-")) SetList["betting"] = {
+                    "per": true,
+                    "value": Number(DBItem.func["value"].replace("-", ""))
+                  }
+                  SetList["betting"] = {
+                    "per": false,
+                    "value": Number(DBItem.func["value"])
+                  }
                   break;
               }
               break;

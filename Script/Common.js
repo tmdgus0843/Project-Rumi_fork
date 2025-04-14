@@ -68,10 +68,10 @@ let threadQueue = []; //스레드 큐
        * @param {Number} end 종료값
        * @returns {Number} start ~ end 사이의 랜덤값
        */
-      Random: function (start, end) { //랜덤값을 반환합니다.
+      Random: function (start, end) { //랜덤 실수값을 반환합니다.
         return (start + (Math.random() * (end - start)))
       },
-      RandomFloat: function (start, end) { //랜덤 실수값을 반환합니다.
+      RandomFloor: function (start, end) { //랜덤 정수값을 반환합니다.
         return (start + Math.floor(Math.random() * (end - start + 1)));
       },
       RandomArray: function (arr) { //랜덤 배열값을 반환합니다.
